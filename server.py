@@ -81,13 +81,31 @@ async def get_status():
 
 @app.post("/api/clear")
 async def clear_database():
-    if os.path.exists(PERSIST_DIR):
-        try:
-            shutil.rmtree(PERSIST_DIR)
+    try:
+        if os.path.exists(PERSIST_DIR):
+            embeddings = get_embedding_model()
+            vectorstore = Chroma(
+                persist_directory=PERSIST_DIR,
+                embedding_function=embeddings
+            )
+            vectorstore.delete_collection()
+            
+            try:
+                shutil.rmtree(PERSIST_DIR)
+            except Exception:
+                pass # Ignore directory deletion errors since collection is cleared
+            
             return {"status": "success", "message": "Database cleared successfully."}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to clear database: {str(e)}")
-    return {"status": "success", "message": "Database was already empty."}
+        return {"status": "success", "message": "Database was already empty."}
+    except Exception as e:
+        # Fallback to direct directory deletion if Chroma initialization failed
+        if os.path.exists(PERSIST_DIR):
+            try:
+                shutil.rmtree(PERSIST_DIR)
+                return {"status": "success", "message": "Database cleared successfully."}
+            except Exception as e2:
+                raise HTTPException(status_code=500, detail=f"Failed to clear database: {str(e2)}")
+        return {"status": "success", "message": "Database was already empty."}
 
 class QueryRequest(BaseModel):
     question: str
