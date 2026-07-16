@@ -53,7 +53,7 @@ The RAG system follows a modular architecture with the following components:
 
 ```bash
 # Clone the repository
-git clone https://github.com/rahulsvt-1907/RagwithPDF
+git clone https://github.com/jyotiranjanpraharaj/RAGwithPdf.git
 
 
 # Create virtual environment
