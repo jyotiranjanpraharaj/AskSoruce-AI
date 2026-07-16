@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study mate</title>
+    <title>LearnFLux</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +20,7 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fa-solid fa-graduation-cap"></i>
-                    <span>Study mate</span>
+                    <span>LearnFLux</span>
                 </div>
             </div>
 
@@ -47,9 +47,23 @@
         <main class="chat-container">
             <header class="chat-header">
                 <div class="header-info">
-                    <h1 id="current-doc-title">Study mate</h1>
+                    <button class="btn-header-home" id="btn-header-home" title="Back to Welcome Screen" style="display: none;">
+                        <i class="fa-solid fa-house"></i> Home
+                    </button>
+                    <h1 id="current-doc-title"></h1>
                 </div>
-                <!-- Right top delete button removed as requested -->
+                
+                <!-- More options menu -->
+                <div class="header-menu-container">
+                    <button class="btn-more-options" id="btn-more-options" title="More options">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="dropdown-menu" id="header-dropdown" style="display: none;">
+                        <button class="dropdown-item" id="btn-faq"><i class="fa-solid fa-circle-question"></i> Q&A Session</button>
+                        <button class="dropdown-item" id="btn-tech"><i class="fa-solid fa-microchip"></i> Technologies Used</button>
+                        <button class="dropdown-item" id="btn-author"><i class="fa-solid fa-user-tie"></i> About the Engineer</button>
+                    </div>
+                </div>
             </header>
 
             <!-- Chat Messages / Welcome Container -->
@@ -59,7 +73,7 @@
                     <div class="welcome-logo">
                         <i class="fa-solid fa-graduation-cap"></i>
                     </div>
-                    <h2>What can Study mate help you learn today?</h2>
+                    <h2>What can LearnFLux help you learn today?</h2>
                     <p class="welcome-desc">Attach any document and ask any questions to learn or analyze instantly.</p>
                     
                     <div class="welcome-features">
@@ -130,6 +144,39 @@
                 <!-- Supports info text removed as requested -->
             </div>
         </main>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="custom-confirm-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+                <button class="btn-close-modal" id="btn-close-confirm">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-modal-message">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" id="btn-confirm-cancel">Cancel</button>
+                <button class="btn-modal btn-confirm-delete" id="btn-confirm-ok">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Detail Modal -->
+    <div id="info-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content info-modal-content">
+            <div class="modal-header">
+                <h3 id="info-modal-title">Information</h3>
+                <button class="btn-close-modal" id="btn-close-info">&times;</button>
+            </div>
+            <div class="modal-body" id="info-modal-body">
+                <!-- Content will be injected dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" id="btn-close-info-ok">Close</button>
+            </div>
+        </div>
     </div>
 
     <!-- Custom JS -->

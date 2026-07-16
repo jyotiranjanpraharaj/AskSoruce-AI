@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAttachmentHandlers();
     setupChatHandlers();
     setupFeatureCards();
+    setupHeaderMenuAndDropdown();
 });
 
 // Check Database Status
@@ -65,8 +66,12 @@ async function checkDatabaseStatus() {
 
 function setActiveDocument(filename) {
     activeDocName = filename;
+    const btnHeaderHome = document.getElementById('btn-header-home');
+    
     if (filename) {
         currentDocTitle.textContent = filename;
+        if (btnHeaderHome) btnHeaderHome.style.display = 'inline-flex';
+        
         docList.innerHTML = `
             <div class="doc-item active">
                 <i class="fa-solid fa-file-lines"></i>
@@ -75,11 +80,21 @@ function setActiveDocument(filename) {
                     <i class="fa-solid fa-trash-can"></i>
                 </button>
             </div>
+            <button class="btn-sidebar-upload-another" id="btn-sidebar-upload-another" title="Upload another document">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Another
+            </button>
         `;
         enableChat(true);
         setupSidebarDeleteHandler();
+        
+        // Setup sidebar upload another button listener
+        document.getElementById('btn-sidebar-upload-another')?.addEventListener('click', () => {
+            if (!isUploading) fileInput.click();
+        });
     } else {
-        currentDocTitle.textContent = 'Study mate';
+        currentDocTitle.textContent = '';
+        if (btnHeaderHome) btnHeaderHome.style.display = 'none';
+        
         docList.innerHTML = '<div class="no-docs-text">No document loaded</div>';
         enableChat(false);
     }
@@ -90,7 +105,8 @@ function setupSidebarDeleteHandler() {
     if (btnDeleteDoc) {
         btnDeleteDoc.addEventListener('click', async (e) => {
             e.stopPropagation();
-            if (confirm(`Are you sure you want to delete and reset the database for "${activeDocName}"?`)) {
+            const confirmed = await showCustomConfirm(`Are you sure you want to delete and reset the database for "${activeDocName}"?`);
+            if (confirmed) {
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/clear`, {
                         method: 'POST'
@@ -99,10 +115,10 @@ function setupSidebarDeleteHandler() {
                     
                     setActiveDocument(null);
                     showChatLogs(false);
-                    alert('Database cleared successfully!');
+                    showCustomAlert('Database Reset', 'Database cleared successfully!');
                 } catch (error) {
                     console.error('Error clearing database:', error);
-                    alert(`Failed to delete: ${error.message}`);
+                    showCustomAlert('Error', `Failed to delete: ${error.message}`);
                 }
             }
         });
@@ -124,7 +140,7 @@ function enableChat(enabled) {
     chatInput.disabled = !enabled;
     btnSend.disabled = !enabled;
     if (enabled) {
-        chatInput.placeholder = 'Ask Study mate...';
+        chatInput.placeholder = 'Ask LearnFLux...';
     } else {
         chatInput.placeholder = 'Attach a document below to start...';
     }
@@ -225,7 +241,7 @@ function uploadFile(file) {
     
     function handleUploadError(message) {
         console.error('Upload failed:', message);
-        alert(`Failed to load document: ${message}`);
+        showCustomAlert('Upload Failed', `Failed to load document: ${message}`);
         progressContainer.style.display = 'none';
         setActiveDocument(null);
         isUploading = false;
@@ -253,10 +269,6 @@ function setupChatHandlers() {
 
     btnNewChat.addEventListener('click', () => {
         showChatLogs(false);
-        if (activeDocName) {
-            showChatLogs(true);
-            appendSystemMessage(`Start a new conversation about <strong>${escapeHtml(activeDocName)}</strong>.`);
-        }
     });
 }
 
@@ -439,4 +451,169 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+// Custom Promise-based Confirmation Dialog
+function showCustomConfirm(message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('custom-confirm-modal');
+        const msgEl = document.getElementById('confirm-modal-message');
+        const btnOk = document.getElementById('btn-confirm-ok');
+        const btnCancel = document.getElementById('btn-confirm-cancel');
+        const btnClose = document.getElementById('btn-close-confirm');
+        
+        msgEl.textContent = message;
+        modal.style.display = 'flex';
+        
+        function cleanup() {
+            modal.style.display = 'none';
+            btnOk.removeEventListener('click', onOk);
+            btnCancel.removeEventListener('click', onCancel);
+            btnClose.removeEventListener('click', onCancel);
+        }
+        
+        function onOk() {
+            cleanup();
+            resolve(true);
+        }
+        
+        function onCancel() {
+            cleanup();
+            resolve(false);
+        }
+        
+        btnOk.addEventListener('click', onOk);
+        btnCancel.addEventListener('click', onCancel);
+        btnClose.addEventListener('click', onCancel);
+    });
+}
+
+// Custom Alert Dialog (using the info modal structure)
+function showCustomAlert(title, message) {
+    const modal = document.getElementById('info-modal');
+    const titleEl = document.getElementById('info-modal-title');
+    const bodyEl = document.getElementById('info-modal-body');
+    const btnOk = document.getElementById('btn-close-info-ok');
+    const btnClose = document.getElementById('btn-close-info');
+    
+    titleEl.textContent = title;
+    bodyEl.innerHTML = `<p>${escapeHtml(message)}</p>`;
+    modal.style.display = 'flex';
+    
+    function cleanup() {
+        modal.style.display = 'none';
+        btnOk.removeEventListener('click', cleanup);
+        btnClose.removeEventListener('click', cleanup);
+    }
+    
+    btnOk.addEventListener('click', cleanup);
+    btnClose.addEventListener('click', cleanup);
+}
+
+// Setup Hamburger Menu Options, Modal, and Navigation
+function setupHeaderMenuAndDropdown() {
+    const btnMoreOptions = document.getElementById('btn-more-options');
+    const headerDropdown = document.getElementById('header-dropdown');
+    const btnHeaderHome = document.getElementById('btn-header-home');
+
+    if (btnMoreOptions && headerDropdown) {
+        btnMoreOptions.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = headerDropdown.style.display === 'none';
+            headerDropdown.style.display = isHidden ? 'flex' : 'none';
+        });
+
+        document.addEventListener('click', () => {
+            headerDropdown.style.display = 'none';
+        });
+    }
+
+    if (btnHeaderHome) {
+        btnHeaderHome.addEventListener('click', () => {
+            showChatLogs(false);
+        });
+    }
+
+    document.getElementById('btn-faq')?.addEventListener('click', () => {
+        const modal = document.getElementById('info-modal');
+        document.getElementById('info-modal-title').textContent = 'Q&A Session';
+        document.getElementById('info-modal-body').innerHTML = `
+            <div class="faq-item">
+                <div class="faq-question"><i class="fa-solid fa-circle-question"></i> What is LearnFLux?</div>
+                <div class="faq-answer">LearnFLux is an advanced AI-powered assistant designed to help you interact, query, and learn from your uploaded documents (PDFs, text files, and DOCX documents) using Retrieval-Augmented Generation (RAG).</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question"><i class="fa-solid fa-circle-question"></i> How does the document upload work?</div>
+                <div class="faq-answer">When you upload a document, the system splits it into manageable text chunks, computes vector embeddings for each chunk, and stores them in a local Chroma vector database. The AI then retrieves relevant context from these chunks to provide accurate, grounded answers.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question"><i class="fa-solid fa-circle-question"></i> What file formats are supported?</div>
+                <div class="faq-answer">Supported formats include PDF, DOCX, TXT, Markdown, CSV, HTML, CSS, JavaScript, JSON, and Python files.</div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        setupInfoModalClose();
+    });
+
+    document.getElementById('btn-tech')?.addEventListener('click', () => {
+        const modal = document.getElementById('info-modal');
+        document.getElementById('info-modal-title').textContent = 'Technologies Used';
+        document.getElementById('info-modal-body').innerHTML = `
+            <div class="tech-section">
+                <div class="tech-group">
+                    <div class="tech-group-title"><i class="fa-solid fa-code"></i> Frontend</div>
+                    <div class="tech-list">HTML5, Vanilla CSS3 (Custom design system with warm-light theme), and Vanilla JavaScript (ES6+).</div>
+                </div>
+                <div class="tech-group">
+                    <div class="tech-group-title"><i class="fa-solid fa-server"></i> Backend & API</div>
+                    <div class="tech-list">FastAPI (Python) and Uvicorn.</div>
+                </div>
+                <div class="tech-group">
+                    <div class="tech-group-title"><i class="fa-solid fa-brain"></i> RAG & AI Orchestration</div>
+                    <div class="tech-list">LangChain, Chroma DB (Vector Database), HuggingFace Embeddings (MiniLM-L6-v2), and Mistral AI (mistral-small LLM).</div>
+                </div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        setupInfoModalClose();
+    });
+
+    document.getElementById('btn-author')?.addEventListener('click', () => {
+        const modal = document.getElementById('info-modal');
+        document.getElementById('info-modal-title').textContent = 'About the Engineer';
+        document.getElementById('info-modal-body').innerHTML = `
+            <div class="author-card">
+                <div class="author-avatar">JP</div>
+                <div class="author-name">Jyotiranjan Praharaj</div>
+                <div class="author-role">AI/ML Engineer</div>
+                <div class="author-bio">Jyotiranjan Praharaj is an AI/ML Engineer specializing in designing and deploying intelligent agents, natural language processing solutions, and advanced Retrieval-Augmented Generation (RAG) pipelines. With expertise in Large Language Models (LLMs), semantic search infrastructure, and modern web architectures, he builds scalable, production-ready AI applications that connect complex data sources with intuitive conversational interfaces.</div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+        setupInfoModalClose();
+    });
+
+    // Clicking document item goes back to active chat logs view
+    document.getElementById('documents-list')?.addEventListener('click', (e) => {
+        const docItem = e.target.closest('.doc-item');
+        if (docItem && activeDocName && !e.target.closest('.btn-delete-doc') && !e.target.closest('.btn-sidebar-upload-another')) {
+            showChatLogs(true);
+        }
+    });
+}
+
+// Setup Hamburger Menu Options, Modal, and Navigation close helper
+function setupInfoModalClose() {
+    const modal = document.getElementById('info-modal');
+    const btnOk = document.getElementById('btn-close-info-ok');
+    const btnClose = document.getElementById('btn-close-info');
+    
+    function close() {
+        modal.style.display = 'none';
+        btnOk.removeEventListener('click', close);
+        btnClose.removeEventListener('click', close);
+    }
+    
+    btnOk.addEventListener('click', close);
+    btnClose.addEventListener('click', close);
 }
