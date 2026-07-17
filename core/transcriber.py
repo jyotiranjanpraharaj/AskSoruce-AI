@@ -1,4 +1,4 @@
-from openai import OpenAI
+from groq import Groq
 import os
 import requests
 from pydub import AudioSegment
@@ -7,34 +7,25 @@ from pydub import AudioSegment
 # We slice each chunk into 25s pieces (with a 5s safety margin) before sending.
 SARVAM_PIECE_SECONDS = 25
 
-
-WHISPER_MODEL = os.getenv("WHISPER_MODEL", "small")
-
-
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
 SARVAM_STT_TRANSLATE_URL = "https://api.sarvam.ai/speech-to-text-translate"
 SARVAM_MODEL = os.getenv("SARVAM_STT_MODEL", "saaras:v2.5")
 
-_model = None
-
-
-def load_model():
-
-    global _model  
-
-    if _model is None: 
-        print(f"Loading Whisper model: {WHISPER_MODEL} ...")
-        _model = whisper.load_model(WHISPER_MODEL) 
-        print("Whisper model loaded.")
-    return _model 
-
 
 def transcribe_chunk_whisper(chunk_path: str) -> str:
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        raise RuntimeError("GROQ_API_KEY is not set in environment / .env")
 
-    model = load_model()  
+    client = Groq(api_key=groq_api_key)
 
-    result = model.transcribe(chunk_path, task="transcribe")  
-    return result["text"]  
+    with open(chunk_path, "rb") as file:
+        transcription = client.audio.transcriptions.create(
+            file=(os.path.basename(chunk_path), file.read()),
+            model="whisper-large-v3",
+            response_format="json",
+        )
+    return transcription.text  
 
 
 def _send_to_sarvam(piece_path: str) -> str:
