@@ -1,97 +1,101 @@
+# 🧠 AskSource-AI
 
+An advanced document and meeting AI assistant built with **LangChain (LCEL)**, **FastAPI**, **Chroma DB**, **Groq Whisper**, and **Mistral AI**. It implements two pipelines:
+1. **Document RAG Pipeline (FastAPI Backend)**: Ingests documents (PDF, DOCX, TXT, code files, etc.) and performs semantic Q&A with source citations.
+2. **Audio/YouTube Pipeline (CLI/Engine)**: Downloads audio from YouTube URLs or local audio files, transcribes them using Groq Whisper (supporting English/Hindi/Hinglish), extracts summaries/action items, and provides semantic Q&A over the transcript.
 
-```markdown
-# GenAI Part 2: RAG Implementation
+---
 
-A comprehensive implementation of Retrieval-Augmented Generation (RAG) system that enhances Large Language Models with external knowledge retrieval capabilities.
+## 🏗️ System Architecture
 
-## Overview
+* **Audio Ingestion**: YouTube URL / Local Audio ➔ `pytubefix` Download ➔ `pydub` (converted to 16kHz mono WAV) ➔ Chunking.
+* **Transcription & Extraction**: Audio Chunks ➔ Groq Whisper Cloud API (Transcriptions) ➔ Mistral AI (Summary, Action Items, Key Decisions, and Questions Extraction).
+* **RAG Pipeline**: Text Chunks ➔ HuggingFace Embeddings (`all-MiniLM-L6-v2`) ➔ Chroma Vector Store ➔ Mistral AI Context-Aware QA.
 
-This repository contains a complete implementation of a RAG (Retrieval-Augmented Generation) system that combines the power of Large Language Models with external knowledge retrieval. The system processes documents, creates vector embeddings, and enables context-aware question answering using state-of-the-art NLP techniques.
+---
 
-## Features
+## 🛠️ Tech Stack
+* **LLM Engine**: Mistral AI API (`mistral-small-latest`, `mistral-small-2506`)
+* **Orchestration**: LangChain (Expression Language - LCEL)
+* **Speech-to-Text**: Groq Cloud API (Whisper-large-v3)
+* **Vector Store**: Chroma DB
+* **Text Embeddings**: HuggingFace Sentence Transformers (`all-MiniLM-L6-v2`)
+* **Audio Engineering**: `pytubefix` & `pydub` (FFmpeg)
+* **Backend Framework**: FastAPI & Uvicorn
 
-- 📚 **Document Processing**: Support for multiple document formats (PDF, TXT, DOCX)
-- 🧠 **Vector Embeddings**: Advanced embedding generation using transformer models
-- 🔍 **Semantic Search**: Efficient similarity search using FAISS vector database
-- 💬 **Chat Interface**: Interactive web-based chat interface for querying
-- 🐳 **Docker Support**: Containerized deployment for easy setup
-- ⚡ **Real-time Processing**: Fast document indexing and retrieval
+---
 
-## Architecture
-
-The RAG system follows a modular architecture with the following components:
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Documents     │───▶│  Text Processing │───▶│  Vector Store   │
-│   (PDF/TXT)     │    │   & Chunking     │    │   (FAISS)     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-        │                                              │
-        ▼                                              ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Embedding     │◀───│  Similarity      │◀───│  User Query     │
-│   Generation    │    │   Search         │    │   Interface     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-        │                                              │
-        ▼                                              ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   LLM Model     │◀───│  Context         │◀───│  RAG Chain      │
-│   (Phi-2)       │    │   Retrieval      │    │   Pipeline      │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+## 📁 Repository Structure
+```text
+📂 AskSource-AI/
+├── 📁 core/                 # Core AI modules (rag_engine, extractor, summarizer, transcriber, vector_store)
+├── 📁 utils/                # Audio conversion and download helpers
+├── main.py                 # FastAPI server (Document RAG API)
+├── run_pipeline.py         # End-to-end CLI runner for YouTube/Audio pipeline
+├── test.py                 # Unit tests (Mocked transcriber check)
+├── requirements.txt        # Project dependencies
+└── .env                    # Environment variables (API keys)
 ```
 
-## Prerequisites
+---
 
-- Python 3.8 or higher
-- 4GB+ RAM recommended
-- CUDA-compatible GPU (optional, for faster processing)
+## 🚀 Installation & Setup
 
-## Installation
+### Prerequisites
+* **Python 3.10+**
+* **FFmpeg** (Required for audio processing)
+  * *Windows* (cmd as Admin): `winget install Gyan.FFmpeg`
+  * *macOS*: `brew install ffmpeg`
+  * *Ubuntu*: `sudo apt update && sudo apt install ffmpeg`
 
-### Manual Installation
+### Setup Instructions
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/jyotiranjanpraharaj/AskSoruce-AI.git
+   cd AskSoruce-AI
+   ```
 
+2. **Create and Activate Virtual Environment**:
+   ```bash
+   python -m venv .venv
+   # On Windows (PowerShell):
+   .venv\Scripts\Activate.ps1
+   # On macOS/Linux:
+   source .venv/bin/activate
+   ```
+
+3. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Environment Variables**:
+   Create a `.env` file in the root folder:
+   ```env
+   MISTRAL_API_KEY=your_mistral_api_key
+   GROQ_API_KEY=your_groq_api_key
+   ```
+
+---
+
+## 🖥️ Usage
+
+### 1. Run Audio / YouTube Pipeline
+Download a YouTube video/Short, transcribe it, extract deliverables, index it, and run test queries:
 ```bash
-# Clone the repository
-git clone https://github.com/jyotiranjanpraharaj/RAGwithPdf.git
+python run_pipeline.py "<YOUTUBE_URL>"
+```
+*Note: Temporary audio files and chunks are automatically cleaned up after the pipeline runs.*
 
+### 2. Run FastAPI Document Q&A Server
+Start the backend for uploading and querying files (PDF, DOCX, TXT):
+```bash
+python main.py
+```
+* Interactive docs will be available at `http://127.0.0.1:8000/docs`.
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-#To run project
-streamlit app.py
-
-
-## Performance Optimization
-
-### For Large Document Collections:
-- Use GPU acceleration for embedding generation
-- Implement document chunking strategies
-- Configure FAISS index parameters
-- Use approximate search for faster retrieval
-
-### For Real-time Applications:
-- Pre-compute document embeddings
-- Use efficient similarity search algorithms
-- Implement caching mechanisms
-- Optimize LLM inference parameters
-
-## Troubleshooting
-
-
-## Pipeline Guide & Interview Q&A
-
-For a detailed walkthrough of every stage of the RAG pipeline, the exact functions and classes used at each stage, and a comprehensive set of interview questions and answers, see **[PIPELINE_GUIDE.md](PIPELINE_GUIDE.md)**.
-
-## Acknowledgments
-
-- Hugging Face for transformer models
-- LangChain framework for RAG implementation
-- Streamlit for the web interface
-
-
+### 3. Run Tests
+Verify the transcriber logic using mocked tests:
+```bash
+python -m unittest test.py
+```
