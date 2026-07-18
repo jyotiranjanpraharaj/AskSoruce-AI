@@ -1,28 +1,19 @@
-import yt_dlp
+from pytubefix import YouTube
 from pydub import AudioSegment
 import os
 
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR,exist_ok = True)
 
-def download_youtube_audio(url :str) ->str:
-    output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
-    ydl_opts = {
-        "format": "bestaudio/best",
-        "outtmpl": output_path,
-        "postprocessors": [
-            {
-                "key": "FFmpegExtractAudio",
-                "preferredcodec": "wav",
-                "preferredquality": "192",
-            }
-        ],
-        "quiet": True,
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        filename = ydl.prepare_filename(info).replace(".webm", ".wav").replace(".m4a", ".wav")
-    return filename
+def download_youtube_audio(url: str) -> str:
+    print(f"Downloading from YouTube using pytubefix: {url}")
+    try:
+        yt = YouTube(url)
+        audio_stream = yt.streams.filter(only_audio=True).first()
+        downloaded_file = audio_stream.download(output_path=DOWNLOAD_DIR)
+        return downloaded_file
+    except Exception as e:
+        raise ValueError(f"Failed to download audio from YouTube: {e}")
 
 
 
