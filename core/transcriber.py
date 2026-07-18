@@ -6,7 +6,8 @@ def transcribe_chunk_whisper(chunk_path: str, language: str = None) -> str:
     if not groq_api_key:
         raise RuntimeError("GROQ_API_KEY is not set in environment / .env")
 
-    client = Groq(api_key=groq_api_key)
+    # Set a generous timeout (10 minutes) for large audio chunk uploads
+    client = Groq(api_key=groq_api_key, timeout=600.0)
 
     with open(chunk_path, "rb") as file:
         kwargs = {

@@ -1,8 +1,5 @@
-# 🧠 AskSource-AI
-
-An advanced document and meeting AI assistant built with **LangChain (LCEL)**, **FastAPI**, **Chroma DB**, **Groq Whisper**, and **Mistral AI**. It implements two pipelines:
-1. **Document RAG Pipeline (FastAPI Backend)**: Ingests documents (PDF, DOCX, TXT, code files, etc.) and performs semantic Q&A with source citations.
-2. **Audio/YouTube Pipeline (CLI/Engine)**: Downloads audio from YouTube URLs or local audio files, transcribes them using Groq Whisper (supporting English/Hindi/Hinglish), extracts summaries/action items, and provides semantic Q&A over the transcript.
+An advanced meeting and audio AI assistant built with **LangChain (LCEL)**, **Chroma DB**, **Groq Whisper**, and **Mistral AI**. 
+It downloads audio from YouTube URLs or processes local audio files, transcribes them using Groq Whisper (supporting English, Hindi, and Hinglish), automatically extracts structured deliverables (summaries, action items, key decisions, follow-up questions), and allows semantic Q&A over the transcript using Chroma DB.
 
 ---
 
@@ -87,15 +84,9 @@ python run_pipeline.py "<YOUTUBE_URL>"
 ```
 *Note: Temporary audio files and chunks are automatically cleaned up after the pipeline runs.*
 
-### 2. Run FastAPI Document Q&A Server
-Start the backend for uploading and querying files (PDF, DOCX, TXT):
+### 2. Run Interactive CLI Chat
+Process a source (YouTube URL or local audio file path) and start an interactive terminal-based chat session with the transcript:
 ```bash
 python main.py
 ```
 * Interactive docs will be available at `http://127.0.0.1:8000/docs`.
-
-### 3. Run Tests
-Verify the transcriber logic using mocked tests:
-```bash
-python -m unittest test.py
-```
