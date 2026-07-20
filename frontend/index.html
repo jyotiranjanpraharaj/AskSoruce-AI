@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,7 +24,13 @@
                     <button class="btn-home-header" id="btn-home-header" title="Go to Home Screen">
                         <i class="fa-solid fa-house"></i>
                     </button>
-                    <h1 id="current-doc-title">Welcome to AskSource-AI</h1>
+                    <!-- AskSource-AI Brand Title and Logo (Thick Text Font) -->
+                    <div class="brand-header-logo" id="brand-header-logo">
+                        <i class="fa-solid fa-wand-magic-sparkles brand-logo-icon"></i>
+                        <span class="brand-logo-text">AskSource-AI</span>
+                    </div>
+                    <span class="header-nav-divider" id="header-nav-divider" style="display: none;">/</span>
+                    <h1 id="current-doc-title" style="display: none;">Welcome to AskSource-AI</h1>
                 </div>
                 
                 <!-- More options menu -->
@@ -45,55 +53,206 @@
             <div class="chat-messages-wrapper">
                 <!-- Landing/Home Screen -->
                 <div class="landing-screen" id="landing-screen">
+                    <!-- Soft Animated Background -->
+                    <div class="glow-backdrop">
+                        <div class="glow-blob blob-1"></div>
+                        <div class="glow-blob blob-2"></div>
+                        <div class="glow-blob blob-3"></div>
+                    </div>
+
+                    <!-- SVG Connector Lines -->
+                    <svg class="connector-svg" viewBox="0 0 1200 600" preserveAspectRatio="none">
+                        <path d="M 120,220 L 320,100 L 600,140" class="connector-path path-1" />
+                        <path d="M 600,140 L 880,100 L 1080,220" class="connector-path path-2" />
+                    </svg>
+
+                    <!-- Left Modern Browser-Style YouTube Player Card -->
+                    <div class="landing-decoration deco-left">
+                        <div class="deco-card youtube-browser-card">
+                            <div class="browser-chrome">
+                                <div class="chrome-dot red"></div>
+                                <div class="chrome-dot yellow"></div>
+                                <div class="chrome-dot green"></div>
+                                <div class="chrome-url-bar"><i data-lucide="lock" style="width: 10px; height: 10px;"></i> youtube.com/watch?v=k8v38</div>
+                            </div>
+                            <div class="browser-video-screen">
+                                <i data-lucide="youtube" class="youtube-play-logo"></i>
+                                <div class="play-pulse-ring"></div>
+                            </div>
+                            <div class="browser-video-info">
+                                <span class="browser-video-title">Six Months to Transform...</span>
+                                <div class="browser-video-controls">
+                                    <div class="control-btn"><i data-lucide="play" style="width: 12px; height: 12px;"></i></div>
+                                    <div class="control-progress-bar">
+                                        <div class="fill" style="width: 45%;"></div>
+                                    </div>
+                                    <span class="control-time">04:12</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating icons around YouTube card -->
+                        <div class="floating-icon icon-video" title="Video processing"><i data-lucide="video"></i></div>
+                        <div class="floating-icon icon-audio" title="Audio processing"><i data-lucide="volume-2"></i></div>
+                        <div class="floating-icon icon-transcript" title="Speech-to-text transcription"><i data-lucide="file-text"></i></div>
+                        
+                        <!-- 6 extra top/bottom YouTube card emojis (40% cleaned) -->
+                        <div class="floating-icon le-top-1"><i data-lucide="music"></i></div>
+                        <div class="floating-icon le-top-3"><i data-lucide="sparkle"></i></div>
+                        <div class="floating-icon le-top-5"><i data-lucide="volume-1"></i></div>
+                        <div class="floating-icon le-bot-1"><i data-lucide="music"></i></div>
+                        <div class="floating-icon le-bot-3"><i data-lucide="mic"></i></div>
+                        <div class="floating-icon le-bot-5"><i data-lucide="sparkles"></i></div>
+                    </div>
+
+                    <!-- Right Realistic AI Response Panel -->
+                    <div class="landing-decoration deco-right">
+                        <div class="deco-card ai-response-card">
+                            <div class="response-header">
+                                <div class="response-bot-info">
+                                    <i data-lucide="sparkles" class="bot-icon"></i>
+                                    <span>AI Assistant Response</span>
+                                </div>
+                                <span class="status-badge"><i data-lucide="check" style="width: 10px; height: 10px;"></i> Ready</span>
+                            </div>
+                            <div class="response-body">
+                                <div class="response-section">
+                                    <h5><i data-lucide="align-left" style="width: 12px; height: 12px; color: var(--primary-color);"></i> Summary Highlights</h5>
+                                    <div class="mock-line"></div>
+                                    <div class="mock-line short"></div>
+                                </div>
+                                <div class="response-section">
+                                    <h5><i data-lucide="check-square" style="width: 12px; height: 12px; color: var(--primary-color);"></i> Key Decisions</h5>
+                                    <div class="mock-line"></div>
+                                </div>
+                                <div class="response-section">
+                                    <h5><i data-lucide="list-todo" style="width: 12px; height: 12px; color: var(--primary-color);"></i> Action Items</h5>
+                                    <div class="mock-line"></div>
+                                    <div class="mock-line short"></div>
+                                </div>
+                                <div class="ask-ai-input-mock">
+                                    <span>Ask a question about this meeting...</span>
+                                    <i data-lucide="send" style="width: 12px; height: 12px;"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating icons around AI response card -->
+                        <div class="floating-icon icon-ai" title="AI Orchestrator"><i data-lucide="brain"></i></div>
+                        <div class="floating-icon icon-chat" title="Interactive Chat"><i data-lucide="message-square"></i></div>
+                        <div class="floating-icon icon-search" title="Semantic search retriever"><i data-lucide="search"></i></div>
+                        
+                        <!-- 6 extra top/bottom Q&A card emojis (40% cleaned) -->
+                        <div class="floating-icon re-top-1"><i data-lucide="music"></i></div>
+                        <div class="floating-icon re-top-3"><i data-lucide="sparkle"></i></div>
+                        <div class="floating-icon re-top-5"><i data-lucide="headphones"></i></div>
+                        <div class="floating-icon re-bot-1"><i data-lucide="sparkles"></i></div>
+                        <div class="floating-icon re-bot-3"><i data-lucide="music"></i></div>
+                        <div class="floating-icon re-bot-5"><i data-lucide="sparkles"></i></div>
+                    </div>
+
+                    <!-- Floating sparkles decorative elements -->
+                    <div class="sparkle sparkle-1"><i data-lucide="sparkles"></i></div>
+                    <div class="sparkle sparkle-2"><i data-lucide="sparkle"></i></div>
+                    <div class="sparkle sparkle-3"><i data-lucide="sparkle"></i></div>
+                    <div class="sparkle sparkle-4"><i data-lucide="sparkle"></i></div>
+                    <div class="sparkle sparkle-5"><i data-lucide="sparkles"></i></div>
+                    <div class="sparkle sparkle-6"><i data-lucide="sparkle"></i></div>
+                    <div class="sparkle sparkle-7"><i data-lucide="sparkles"></i></div>
+                    
+                    <!-- Added MP3 audio and Transcript sparkles in empty space -->
+                    <div class="sparkle sparkle-audio-1"><i data-lucide="music"></i></div>
+                    <div class="sparkle sparkle-audio-2"><i data-lucide="file-audio"></i></div>
+                    <div class="sparkle sparkle-trans-1"><i data-lucide="file-text"></i></div>
+                    <div class="sparkle sparkle-trans-2"><i data-lucide="text-quote"></i></div>
+
+                    <!-- Main Hero Center Box -->
                     <div class="landing-hero">
-                        <div class="landing-logo">
-                            <i class="fa-solid fa-microphone-lines"></i>
-                        </div>
                         <h2>Supercharge Your Meetings with AskSource-AI</h2>
-                        <p class="landing-subtitle">An intelligent AI-powered meeting and audio assistant that transcribes discussions, automatically extracts key decisions and action items, and allows you to chat directly with your transcript.</p>
+                        <p class="landing-subtitle">An intelligent AI-powered meeting and audio assistant that transcribes discussions, extracts decisions, and allows you to chat directly with your transcript.</p>
                     </div>
 
+                    <!-- Premium Platform Capabilities box with light green glow -->
                     <div class="features-single-box">
-                        <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Platform Capabilities</h3>
-                        <div class="feature-cycler-container">
-                            <div class="feature-item-inline cycler-item active" data-index="0">
-                                <i class="fa-solid fa-align-left text-green"></i>
-                                <div>
-                                    <h4>Meeting Summarization</h4>
-                                    <p>Get high-level executive summaries and takeaways instantly.</p>
+                        <h3><i data-lucide="sparkles"></i> Platform Capabilities</h3>
+                        <div class="feature-cycler-box-container">
+                            <div class="feature-card-premium active" data-index="0">
+                                <div class="feature-col-icon blue">
+                                    <i data-lucide="mic"></i>
                                 </div>
+                                <h4>Transcribe Audio & Video</h4>
+                                <p>Accurate AI transcription in seconds from YouTube videos or uploads.</p>
                             </div>
-                            <div class="feature-item-inline cycler-item" data-index="1">
-                                <i class="fa-solid fa-lightbulb text-yellow"></i>
-                                <div>
-                                    <h4>Key Decisions</h4>
-                                    <p>Extract critical decisions to keep everyone aligned.</p>
+                            <div class="feature-card-premium" data-index="1">
+                                <div class="feature-col-icon green">
+                                    <i data-lucide="file-text"></i>
                                 </div>
+                                <h4>Smart Summary & Insights</h4>
+                                <p>AI-generated meeting summaries, decisions, and action items instantly.</p>
                             </div>
-                            <div class="feature-item-inline cycler-item" data-index="2">
-                                <i class="fa-solid fa-clipboard-question text-green"></i>
-                                <div>
-                                    <h4>Action Items</h4>
-                                    <p>Identify actionable tasks, assignees, and deadlines.</p>
+                            <div class="feature-card-premium" data-index="2">
+                                <div class="feature-col-icon orange">
+                                    <i data-lucide="messages-square"></i>
                                 </div>
+                                <h4>Ask Anything (Q&A)</h4>
+                                <p>Chat with transcript context, ask questions, and cite answers.</p>
                             </div>
-                            <div class="feature-item-inline cycler-item" data-index="3">
-                                <i class="fa-solid fa-comments text-green"></i>
-                                <div>
-                                    <h4>Interactive RAG Chat</h4>
-                                    <p>Query specific details and context from your transcript.</p>
+                            <div class="feature-card-premium" data-index="3">
+                                <div class="feature-col-icon purple">
+                                    <i data-lucide="upload-cloud"></i>
                                 </div>
+                                <h4>Upload Audio Files</h4>
+                                <p>Supports multiple formats (mp3, wav, mp4) processed securely.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="landing-actions">
-                        <button class="btn btn-try-now" id="btn-try-now">
-                            Try Now <i class="fa-solid fa-arrow-right"></i>
-                        </button>
-                        <button class="btn btn-resume-session" id="btn-resume-session" style="display: none;">
-                            Resume Session <i class="fa-solid fa-clock-rotate-left"></i>
-                        </button>
+                    <!-- Supported Sources Row (Expanded & Styled Larger) -->
+                    <div class="supported-sources-row">
+                        <span class="label">Supported Formats:</span>
+                        <div class="source-format-badge"><svg viewBox="0 0 24 24" width="14" height="14" fill="#ff0000" style="display: inline-block; vertical-align: middle; margin-right: 4px; flex-shrink: 0;"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.516 0-9.387.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.507 9.387.507 9.387.507s7.517 0 9.387-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg> Youtube link</div>
+                        <div class="source-format-badge"><i data-lucide="music" style="color: #3b82f6 !important; width: 14px; height: 14px; stroke-width: 2.5;"></i> Mp3</div>
+                        <div class="source-format-badge"><i data-lucide="video" style="color: #a855f7 !important; width: 14px; height: 14px; stroke-width: 2.5;"></i> Mp4</div>
+                        <div class="source-format-badge"><i data-lucide="headphones" style="color: #22c55e !important; width: 14px; height: 14px; stroke-width: 2.5;"></i> Wav</div>
+                    </div>
+
+                    <!-- Statistics Row (Same max-width as the main box) -->
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <h3>&lt; 10s</h3>
+                            <p>Processing Time</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>2+</h3>
+                            <p>Languages Supported</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>RAG</h3>
+                            <p>AI-Powered Indexing</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3>100%</h3>
+                            <p>Secure & Private</p>
+                        </div>
+                    </div>
+
+                    <!-- CTA Actions Area -->
+                    <div class="landing-actions-container">
+                        <div class="landing-actions">
+                            <button class="btn btn-try-now-premium" id="btn-try-now">
+                                Try Now <i data-lucide="arrow-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Rotating Example Questions widget -->
+                        <div class="example-questions-widget">
+                            <span class="widget-label">Try asking AI:</span>
+                            <span class="rotating-question" id="rotating-question">Summarize this meeting</span>
+                        </div>
+                    </div>
+
+                    <div class="landing-footer-secure">
+                        <i data-lucide="shield-check"></i> Secure • Private • AI-Powered
                     </div>
                 </div>
 

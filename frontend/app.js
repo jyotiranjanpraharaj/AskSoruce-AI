@@ -2,9 +2,10 @@
 const btnHomeHeader = document.getElementById('btn-home-header');
 const btnHeaderNewSession = document.getElementById('btn-header-new-session');
 const currentDocTitle = document.getElementById('current-doc-title');
+const brandHeaderLogo = document.getElementById('brand-header-logo');
+const headerNavDivider = document.getElementById('header-nav-divider');
 const landingScreen = document.getElementById('landing-screen');
 const btnTryNow = document.getElementById('btn-try-now');
-const btnResumeSession = document.getElementById('btn-resume-session');
 
 // Ingestion Form Elements
 const youtubeUrlInput = document.getElementById('youtube-url-input');
@@ -55,9 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAttachmentHandlers();
     setupChatHandlers();
     setupTabHandlers();
-    setupFeatureCards();
     setupHeaderMenuAndDropdown();
     setupDownloadHandler();
+    
+    // Initialize Lucide Icons
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+    
+    // Initialize Example Questions cycler
+    startExampleQuestionsCycler();
+    
+    // Initialize capabilities cycler
+    startCapabilitiesCycler();
 });
 
 // Check Database Status on startup
@@ -71,10 +82,7 @@ async function checkDatabaseStatus() {
         if (data.active) {
             activeSessionData = data;
             activeSession = data.source_name;
-            // Display Resume Session button on landing page
-            if (btnResumeSession) btnResumeSession.style.display = 'inline-flex';
         } else {
-            if (btnResumeSession) btnResumeSession.style.display = 'none';
             activeSessionData = null;
             activeSession = null;
         }
@@ -200,6 +208,11 @@ function resetUIState() {
     activeSession = null;
     currentDocTitle.textContent = 'Welcome to AskSource-AI';
     
+    // Toggle header nav elements: Only show brand logo
+    if (brandHeaderLogo) brandHeaderLogo.style.display = 'flex';
+    if (headerNavDivider) headerNavDivider.style.display = 'none';
+    if (currentDocTitle) currentDocTitle.style.display = 'none';
+    
     // Show landing screen, hide ingest and dashboard
     if (landingScreen) landingScreen.style.display = 'flex';
     chatWelcome.style.display = 'none';
@@ -207,9 +220,6 @@ function resetUIState() {
     chatInputContainer.style.display = 'none';
     enableChat(false);
     enableControls(true);
-    
-    // Start capability rotation cycle
-    startFeatureCycling();
     
     // Clear inputs
     youtubeUrlInput.value = '';
@@ -220,10 +230,12 @@ function resetUIState() {
 function loadStateIntoUI(state) {
     activeSession = state.source_name;
     
-    // Stop cycling when meeting data is loaded
-    stopFeatureCycling();
-    
     currentDocTitle.textContent = state.title || "Meeting Assistant";
+    
+    // Toggle header nav elements: Show brand logo + divider + active document name
+    if (brandHeaderLogo) brandHeaderLogo.style.display = 'flex';
+    if (headerNavDivider) headerNavDivider.style.display = 'inline';
+    if (currentDocTitle) currentDocTitle.style.display = 'inline-block';
     
     // Set content in tabs
     summaryText.innerHTML = renderMarkdown(state.summary);
@@ -765,18 +777,8 @@ function setupHeaderMenuAndDropdown() {
     // Try Now button in landing screen
     if (btnTryNow) {
         btnTryNow.addEventListener('click', () => {
-            stopFeatureCycling();
             if (landingScreen) landingScreen.style.display = 'none';
             chatWelcome.style.display = 'flex';
-        });
-    }
-
-    // Resume Session button in landing screen
-    if (btnResumeSession) {
-        btnResumeSession.addEventListener('click', () => {
-            if (activeSessionData) {
-                loadStateIntoUI(activeSessionData);
-            }
         });
     }
 
@@ -802,9 +804,7 @@ function setupHeaderMenuAndDropdown() {
             // Clear memory
             activeSession = null;
             activeSessionData = null;
-            if (btnResumeSession) btnResumeSession.style.display = 'none';
             
-            stopFeatureCycling();
             resetUIState();
             // Directly show the ingestion screen
             if (landingScreen) landingScreen.style.display = 'none';
@@ -913,36 +913,54 @@ function setupInfoModalClose() {
     btnClose.addEventListener('click', close);
 }
 
-// Feature cycler for Landing Screen
-let featureCycleInterval = null;
+// Reference GitHub Repo helper is loaded
 
-function startFeatureCycling() {
-    stopFeatureCycling();
+// Example Questions Cycler widget
+let exampleQuestionsInterval = null;
+function startExampleQuestionsCycler() {
+    if (exampleQuestionsInterval) clearInterval(exampleQuestionsInterval);
     
-    const items = document.querySelectorAll('.cycler-item');
-    if (items.length === 0) return;
+    const questionsList = [
+        "Summarize this meeting",
+        "What decisions were made?",
+        "What are the action items?",
+        "Give me key takeaways",
+        "Who spoke the most?"
+    ];
+    let questionIndex = 0;
     
-    let currentIndex = 0;
-    
-    // Reset state
-    items.forEach((item, idx) => {
-        if (idx === 0) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
+    exampleQuestionsInterval = setInterval(() => {
+        const el = document.getElementById('rotating-question');
+        if (el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-6px)';
+            setTimeout(() => {
+                questionIndex = (questionIndex + 1) % questionsList.length;
+                el.textContent = questionsList[questionIndex];
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 300);
         }
-    });
-    
-    featureCycleInterval = setInterval(() => {
-        items[currentIndex].classList.remove('active');
-        currentIndex = (currentIndex + 1) % items.length;
-        items[currentIndex].classList.add('active');
-    }, 1500);
+    }, 2500);
 }
 
-function stopFeatureCycling() {
-    if (featureCycleInterval) {
-        clearInterval(featureCycleInterval);
-        featureCycleInterval = null;
-    }
+// Capabilities card auto cycler
+let capabilitiesInterval = null;
+function startCapabilitiesCycler() {
+    if (capabilitiesInterval) clearInterval(capabilitiesInterval);
+    
+    let activeIndex = 0;
+    capabilitiesInterval = setInterval(() => {
+        const cards = document.querySelectorAll('.feature-card-premium');
+        if (cards && cards.length > 0) {
+            // Remove active class from current card
+            cards[activeIndex].classList.remove('active');
+            
+            // Advance index
+            activeIndex = (activeIndex + 1) % cards.length;
+            
+            // Add active class to next card
+            cards[activeIndex].classList.add('active');
+        }
+    }, 1500); // 1.5 seconds cycle interval!
 }
