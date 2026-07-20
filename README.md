@@ -1,5 +1,5 @@
-An advanced meeting and audio AI assistant built with **LangChain (LCEL)**, **Chroma DB**, **Groq Whisper**, and **Mistral AI**. 
-It downloads audio from YouTube URLs or processes local audio files, transcribes them using Groq Whisper (supporting English, Hindi, and Hinglish), automatically extracts structured deliverables (summaries, action items, key decisions, follow-up questions), and allows semantic Q&A over the transcript using Chroma DB.
+An advanced meeting and audio AI assistant built with **LangChain (LCEL)**, **Pinecone**, **Groq Whisper**, and **Mistral AI**. 
+It downloads audio from YouTube URLs or processes local audio files, transcribes them using Groq Whisper (supporting English, Hindi, and Hinglish), automatically extracts structured deliverables (summaries, action items, key decisions, follow-up questions), and allows semantic Q&A over the transcript using Pinecone.
 
 ---
 
@@ -7,7 +7,7 @@ It downloads audio from YouTube URLs or processes local audio files, transcribes
 
 * **Audio Ingestion**: YouTube URL / Local Audio ➔ `pytubefix` Download ➔ `pydub` (converted to 16kHz mono WAV) ➔ Chunking.
 * **Transcription & Extraction**: Audio Chunks ➔ Groq Whisper Cloud API (Transcriptions) ➔ Mistral AI (Summary, Action Items, Key Decisions, and Questions Extraction).
-* **RAG Pipeline**: Text Chunks ➔ HuggingFace Embeddings (`all-MiniLM-L6-v2`) ➔ Chroma Vector Store ➔ Mistral AI Context-Aware QA.
+* **RAG Pipeline**: Text Chunks ➔ HuggingFace Embeddings (`all-MiniLM-L6-v2`) ➔ Pinecone Vector Store ➔ Mistral AI Context-Aware QA.
 
 ---
 
@@ -15,7 +15,7 @@ It downloads audio from YouTube URLs or processes local audio files, transcribes
 * **LLM Engine**: Mistral AI API (`mistral-small-latest`, `mistral-small-2506`)
 * **Orchestration**: LangChain (Expression Language - LCEL)
 * **Speech-to-Text**: Groq Cloud API (Whisper-large-v3)
-* **Vector Store**: Chroma DB
+* **Vector Store**: Pinecone
 * **Text Embeddings**: HuggingFace Sentence Transformers (`all-MiniLM-L6-v2`)
 * **Audio Engineering**: `pytubefix` & `pydub` (FFmpeg)
 * **Backend Framework**: FastAPI & Uvicorn

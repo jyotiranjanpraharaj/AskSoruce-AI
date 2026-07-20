@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskSource-AI | Video & Audio Meeting Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Chat/Dashboard Interface -->
+        <main class="chat-container">
+            <header class="chat-header">
+                <div class="header-info">
+                    <button class="btn-home-header" id="btn-home-header" title="Go to Home Screen">
+                        <i class="fa-solid fa-house"></i>
+                    </button>
+                    <h1 id="current-doc-title">Welcome to AskSource-AI</h1>
+                </div>
+                
+                <!-- More options menu -->
+                <div class="header-menu-container">
+                    <button class="btn-header-new-session" id="btn-header-new-session" title="New Session">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <button class="btn-more-options" id="btn-more-options" title="More options">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="dropdown-menu" id="header-dropdown" style="display: none;">
+                        <button class="dropdown-item" id="btn-faq"><i class="fa-solid fa-circle-question"></i> FAQ & Guide</button>
+                        <button class="dropdown-item" id="btn-tech"><i class="fa-solid fa-microchip"></i> Technologies Used</button>
+                        <button class="dropdown-item" id="btn-author"><i class="fa-brands fa-github"></i> Reference GitHub Repo</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <div class="chat-messages-wrapper">
+                <!-- Landing/Home Screen -->
+                <div class="landing-screen" id="landing-screen">
+                    <div class="landing-hero">
+                        <div class="landing-logo">
+                            <i class="fa-solid fa-microphone-lines"></i>
+                        </div>
+                        <h2>Supercharge Your Meetings with AskSource-AI</h2>
+                        <p class="landing-subtitle">An intelligent AI-powered meeting and audio assistant that transcribes discussions, automatically extracts key decisions and action items, and allows you to chat directly with your transcript.</p>
+                    </div>
+
+                    <div class="features-single-box">
+                        <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Platform Capabilities</h3>
+                        <div class="feature-cycler-container">
+                            <div class="feature-item-inline cycler-item active" data-index="0">
+                                <i class="fa-solid fa-align-left text-green"></i>
+                                <div>
+                                    <h4>Meeting Summarization</h4>
+                                    <p>Get high-level executive summaries and takeaways instantly.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item-inline cycler-item" data-index="1">
+                                <i class="fa-solid fa-lightbulb text-yellow"></i>
+                                <div>
+                                    <h4>Key Decisions</h4>
+                                    <p>Extract critical decisions to keep everyone aligned.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item-inline cycler-item" data-index="2">
+                                <i class="fa-solid fa-clipboard-question text-green"></i>
+                                <div>
+                                    <h4>Action Items</h4>
+                                    <p>Identify actionable tasks, assignees, and deadlines.</p>
+                                </div>
+                            </div>
+                            <div class="feature-item-inline cycler-item" data-index="3">
+                                <i class="fa-solid fa-comments text-green"></i>
+                                <div>
+                                    <h4>Interactive RAG Chat</h4>
+                                    <p>Query specific details and context from your transcript.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="landing-actions">
+                        <button class="btn btn-try-now" id="btn-try-now">
+                            Try Now <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <button class="btn btn-resume-session" id="btn-resume-session" style="display: none;">
+                            Resume Session <i class="fa-solid fa-clock-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Welcome Section (Ingest Screen) -->
+                <div class="chat-welcome" id="chat-welcome" style="display: none;">
+                    <div class="welcome-logo">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                    </div>
+                    <h2>Ingest Audio / Video to AskSource-AI</h2>
+                    <p class="welcome-desc">Transcribe, extract action items, and chat with YouTube videos or local audio files instantly.</p>
+                    
+                    <!-- Settings / Inputs Panel -->
+                    <div class="ingestion-panel">
+                        <!-- Language Option -->
+                        <div class="form-group">
+                            <label class="form-label" for="language-select">
+                                <i class="fa-solid fa-language"></i> Transcription Language
+                            </label>
+                            <select class="form-control" id="language-select">
+                                <option value="english">English</option>
+                                <option value="hinglish">Hinglish (Hindi + English)</option>
+                            </select>
+                        </div>
+
+                        <!-- YouTube URL Field -->
+                        <div class="form-group">
+                            <label class="form-label" for="youtube-url-input">
+                                <i class="fa-brands fa-youtube" style="color: #ff0000;"></i> Ingest via YouTube URL
+                            </label>
+                            <div class="youtube-input-group">
+                                <input type="text" class="form-control" id="youtube-url-input" placeholder="Paste YouTube link (e.g. https://www.youtube.com/watch?v=...)">
+                                <button class="btn-process-url" id="btn-process-youtube">
+                                    <i class="fa-solid fa-play"></i> Process
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="input-divider">
+                            <span>OR</span>
+                        </div>
+
+                        <!-- Local Audio Upload Button -->
+                        <div class="welcome-upload-container">
+                            <button class="btn-welcome-upload" id="btn-welcome-upload">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span>Upload Audio File</span>
+                            </button>
+                            <input type="file" id="file-input" accept="audio/*,video/*" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- App Quick Features / Tips -->
+                    <div class="welcome-features">
+                        <div class="feature-card" data-prompt="Summarize the core takeaways of this meeting.">
+                            <i class="fa-solid fa-align-left"></i>
+                            <span>Summarize Meeting</span>
+                        </div>
+                        <div class="feature-card" data-prompt="What are the key decisions made in this discussion?">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span>Key Decisions</span>
+                        </div>
+                        <div class="feature-card" data-prompt="List all actionable tasks, owners, and deadlines.">
+                            <i class="fa-solid fa-clipboard-question"></i>
+                            <span>Extract Action Items</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard (Active Session Display) -->
+                <div class="assistant-dashboard" id="assistant-dashboard" style="display: none;">
+                    <!-- Tabs Header -->
+                    <div class="dashboard-tabs">
+                        <button class="tab-btn active" data-tab="summary-tab">
+                            <i class="fa-solid fa-clipboard-list"></i> Summary
+                        </button>
+                        <button class="tab-btn" data-tab="deliverables-tab">
+                            <i class="fa-solid fa-circle-check"></i> Deliverables
+                        </button>
+                        <button class="tab-btn" data-tab="transcript-tab">
+                            <i class="fa-solid fa-file-lines"></i> Transcript
+                        </button>
+                        <button class="tab-btn" data-tab="chat-tab">
+                            <i class="fa-solid fa-comments"></i> Q&A Chat
+                        </button>
+                    </div>
+
+                    <!-- Tab content containers -->
+                    <div class="tab-content active" id="summary-tab">
+                        <div class="content-card">
+                            <h3>Executive Summary & Highlights</h3>
+                            <div class="markdown-content" id="summary-text"></div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="deliverables-tab">
+                        <div class="deliverables-grid">
+                            <div class="content-card deliverable-card">
+                                <h3><i class="fa-solid fa-circle-check text-green"></i> Action Items</h3>
+                                <div class="markdown-content" id="action-items-text"></div>
+                            </div>
+                            <div class="content-card deliverable-card">
+                                <h3><i class="fa-solid fa-key text-yellow"></i> Key Decisions</h3>
+                                <div class="markdown-content" id="key-decisions-text"></div>
+                            </div>
+                            <div class="content-card deliverable-card">
+                                <h3><i class="fa-solid fa-circle-question text-red"></i> Open Questions</h3>
+                                <div class="markdown-content" id="open-questions-text"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="transcript-tab">
+                        <div class="content-card">
+                            <div class="card-header-actions">
+                                <h3>Raw Audio Transcript</h3>
+                                <button class="btn-download" id="btn-download-transcript" title="Download Transcript">
+                                    <i class="fa-solid fa-download"></i> Download TXT
+                                </button>
+                            </div>
+                            <div class="transcript-container" id="transcript-text"></div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="chat-tab">
+                        <div class="chat-tab-messages" id="chat-messages">
+                            <!-- Conversational logs will be placed here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input / Processing Area -->
+            <div class="chat-input-wrapper">
+                <!-- Real-time Ingestion Progress UI -->
+                <div class="progress-container" id="progress-container" style="display: none;">
+                    <div class="progress-info">
+                        <span id="progress-status">Ingesting audio...</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-steps" id="progress-steps">
+                        <div class="step-item" id="step-1"><i class="fa-regular fa-circle"></i> Step 1: Downloading & converting audio</div>
+                        <div class="step-item" id="step-2"><i class="fa-regular fa-circle"></i> Step 2: Transcribing via Groq Whisper</div>
+                        <div class="step-item" id="step-3"><i class="fa-regular fa-circle"></i> Step 3: Generating meeting summary</div>
+                        <div class="step-item" id="step-4"><i class="fa-regular fa-circle"></i> Step 4: Extracting meeting deliverables</div>
+                        <div class="step-item" id="step-5"><i class="fa-regular fa-circle"></i> Step 5: Indexing transcript for RAG chat</div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Fields (shown after processing) -->
+                <div class="chat-input-container" id="chat-input-container" style="display: none;">
+                    <textarea id="chat-input" placeholder="Ask a question about this meeting..." rows="1" disabled></textarea>
+                    <button id="btn-send" title="Send Message" disabled>
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="custom-confirm-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+                <button class="btn-close-modal" id="btn-close-confirm">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-modal-message">Are you sure you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" id="btn-confirm-cancel">Cancel</button>
+                <button class="btn-modal btn-confirm-delete" id="btn-confirm-ok">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Detail Modal -->
+    <div id="info-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content info-modal-content">
+            <div class="modal-header">
+                <h3 id="info-modal-title">Information</h3>
+                <button class="btn-close-modal" id="btn-close-info">&times;</button>
+            </div>
+            <div class="modal-body" id="info-modal-body">
+                <!-- Content will be injected dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" id="btn-close-info-ok">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
