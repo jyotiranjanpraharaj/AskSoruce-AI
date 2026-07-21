@@ -53,6 +53,7 @@ const API_BASE_URL = window.location.origin.includes('localhost') || window.loca
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     checkDatabaseStatus();
+    setupCustomDropdown();
     setupAttachmentHandlers();
     setupChatHandlers();
     setupTabHandlers();
@@ -106,6 +107,16 @@ function enableControls(enabled) {
         btnWelcomeUpload.classList.remove('disabled');
     } else {
         btnWelcomeUpload.classList.add('disabled');
+    }
+    
+    // Toggle state for custom select wrapper
+    const selectWrapper = document.getElementById('language-select-wrapper');
+    if (selectWrapper) {
+        if (enabled) {
+            selectWrapper.classList.remove('disabled');
+        } else {
+            selectWrapper.classList.add('disabled');
+        }
     }
 }
 
@@ -306,6 +317,52 @@ function setupAttachmentHandlers() {
             btnProcessYoutube.click();
         }
     });
+}
+
+// Setup custom dropdown behavior to replace standard browser select element
+function setupCustomDropdown() {
+    const customSelectWrapper = document.getElementById('language-select-wrapper');
+    const customSelectTrigger = document.getElementById('language-select-trigger');
+    const customSelectLabel = document.getElementById('language-select-label');
+    const customOptions = document.querySelectorAll('.custom-option');
+    const hiddenLanguageInput = document.getElementById('language-select');
+
+    if (customSelectTrigger && customSelectWrapper) {
+        customSelectTrigger.addEventListener('click', (e) => {
+            if (customSelectWrapper.classList.contains('disabled')) return;
+            customSelectWrapper.classList.toggle('open');
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', () => {
+            customSelectWrapper.classList.remove('open');
+        });
+
+        customOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                const val = opt.getAttribute('data-value');
+                const text = opt.textContent;
+                
+                // Update hidden input value
+                if (hiddenLanguageInput) {
+                    hiddenLanguageInput.value = val;
+                    hiddenLanguageInput.dispatchEvent(new Event('change'));
+                }
+                
+                // Update label
+                if (customSelectLabel) {
+                    customSelectLabel.textContent = text;
+                }
+                
+                // Update selected class
+                customOptions.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                
+                customSelectWrapper.classList.remove('open');
+                e.stopPropagation();
+            });
+        });
+    }
 }
 
 async function triggerYouTubeProcess(url) {

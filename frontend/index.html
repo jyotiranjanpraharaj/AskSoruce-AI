@@ -271,10 +271,17 @@
                             <label class="form-label" for="language-select">
                                 <i class="fa-solid fa-language"></i> Transcription Language
                             </label>
-                            <select class="form-control" id="language-select">
-                                <option value="english">English</option>
-                                <option value="hinglish">Hinglish (Hindi + English)</option>
-                            </select>
+                            <div class="custom-select-wrapper" id="language-select-wrapper">
+                                <div class="custom-select-trigger" id="language-select-trigger">
+                                    <span id="language-select-label">English</span>
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </div>
+                                <div class="custom-options" id="language-options">
+                                    <div class="custom-option selected" data-value="english">English</div>
+                                    <div class="custom-option" data-value="hinglish">Hinglish (Hindi + English)</div>
+                                </div>
+                                <input type="hidden" id="language-select" value="english">
+                            </div>
                         </div>
 
                         <!-- YouTube URL Field -->
@@ -304,21 +311,7 @@
                         </div>
                     </div>
 
-                    <!-- App Quick Features / Tips -->
-                    <div class="welcome-features">
-                        <div class="feature-card" data-prompt="Summarize the core takeaways of this meeting.">
-                            <i class="fa-solid fa-align-left"></i>
-                            <span>Summarize Meeting</span>
-                        </div>
-                        <div class="feature-card" data-prompt="What are the key decisions made in this discussion?">
-                            <i class="fa-solid fa-lightbulb"></i>
-                            <span>Key Decisions</span>
-                        </div>
-                        <div class="feature-card" data-prompt="List all actionable tasks, owners, and deadlines.">
-                            <i class="fa-solid fa-clipboard-question"></i>
-                            <span>Extract Action Items</span>
-                        </div>
-                    </div>
+                    <!-- App Quick Features / Tips removed to let main box cover full space -->
                 </div>
 
                 <!-- Dashboard (Active Session Display) -->

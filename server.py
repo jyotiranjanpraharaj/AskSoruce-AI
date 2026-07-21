@@ -2,6 +2,11 @@ import os
 import json
 import shutil
 import tempfile
+import ssl
+
+# Bypass SSL verification globally for urllib and HuggingFace API calls
+ssl._create_default_https_context = ssl._create_unverified_context
+
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -203,7 +208,7 @@ async def query_rag(request: QueryRequest):
         rag_chain = load_rag_chain()
         answer = ask_question(rag_chain, request.question)
 
-        # Retrieve sources from Chroma
+        # Retrieve sources from vector store
         sources = []
         try:
             vectorstore = load_vector_store()

@@ -1,13 +1,17 @@
-from groq import Groq
 import os
+import httpx
+from groq import Groq
 
 def transcribe_chunk_whisper(chunk_path: str, language: str = None) -> str:
     groq_api_key = os.getenv("GROQ_API_KEY")
     if not groq_api_key:
         raise RuntimeError("GROQ_API_KEY is not set in environment / .env")
+    
+    groq_api_key = groq_api_key.strip()
 
-    # Set a generous timeout (10 minutes) for large audio chunk uploads
-    client = Groq(api_key=groq_api_key, timeout=600.0)
+    # Set custom httpx timeout covering connect, read, and write operations
+    timeout_config = httpx.Timeout(600.0, connect=60.0, write=600.0)
+    client = Groq(api_key=groq_api_key, timeout=timeout_config)
 
     with open(chunk_path, "rb") as file:
         kwargs = {
