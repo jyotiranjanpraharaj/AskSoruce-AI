@@ -5,3 +5,5 @@ env/
 venv/
 *.pyc
 .ipynb_checkpoints/
+downloades/
+session_state.json

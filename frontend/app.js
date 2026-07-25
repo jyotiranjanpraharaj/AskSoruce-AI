@@ -32,7 +32,7 @@ const btnDownloadTranscript = document.getElementById('btn-download-transcript')
 const progressContainer = document.getElementById('progress-container');
 const progressStatus = document.getElementById('progress-status');
 const progressPercent = document.getElementById('progress-percent');
-const progressBarFill = document.getElementById('progress-bar-fill');
+const progressCircleFill = document.getElementById('progress-circle-fill');
 
 // Chat elements
 const chatInputContainer = document.getElementById('chat-input-container');
@@ -59,15 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
     setupTabHandlers();
     setupHeaderMenuAndDropdown();
     setupDownloadHandler();
-    
+
     // Initialize Lucide Icons
     if (window.lucide) {
         lucide.createIcons();
     }
-    
+
     // Initialize Example Questions cycler
     startExampleQuestionsCycler();
-    
+
     // Initialize capabilities cycler
     startCapabilitiesCycler();
 });
@@ -108,7 +108,7 @@ function enableControls(enabled) {
     } else {
         btnWelcomeUpload.classList.add('disabled');
     }
-    
+
     // Toggle state for custom select wrapper
     const selectWrapper = document.getElementById('language-select-wrapper');
     if (selectWrapper) {
@@ -133,51 +133,57 @@ function enableChat(enabled) {
 // Ingestion Progress Bar step indicators
 function startProgressSimulation() {
     isProcessing = true;
-    progressContainer.style.display = 'block';
-    progressBarFill.style.width = '0%';
+    progressContainer.style.display = 'flex';
+    if (progressCircleFill) {
+        progressCircleFill.style.strokeDashoffset = '339.292';
+    }
     progressPercent.textContent = '0%';
     progressStatus.textContent = 'Starting pipeline...';
-    
+
     // Reset steps UI
     const steps = [1, 2, 3, 4, 5];
     steps.forEach(s => {
         setStepState(s, 'pending');
     });
-    
+
     setStepState(1, 'running');
-    
+
     let elapsed = 0;
     progressInterval = setInterval(() => {
         elapsed += 0.5; // half-second intervals
-        
+
         let percent = 0;
         if (elapsed < 8) {
             setStepState(1, 'running');
             percent = Math.min(Math.round((elapsed / 8) * 15), 15);
-            progressStatus.textContent = 'Downloading and preparing audio source...';
+            progressStatus.textContent = 'Downloading and preparing media source...';
         } else if (elapsed < 25) {
             setStepState(1, 'completed');
             setStepState(2, 'running');
             percent = 15 + Math.min(Math.round(((elapsed - 8) / 17) * 45), 45);
-            progressStatus.textContent = 'Transcribing audio chunks using Groq Whisper...';
+            progressStatus.textContent = 'Transcribing audio content...';
         } else if (elapsed < 35) {
             setStepState(2, 'completed');
             setStepState(3, 'running');
             percent = 60 + Math.min(Math.round(((elapsed - 25) / 10) * 15), 15);
-            progressStatus.textContent = 'Generating Executive Summary and title...';
+            progressStatus.textContent = 'Generating executive summary...';
         } else if (elapsed < 48) {
             setStepState(3, 'completed');
             setStepState(4, 'running');
             percent = 75 + Math.min(Math.round(((elapsed - 35) / 13) * 15), 15);
-            progressStatus.textContent = 'Extracting key deliverables and action items...';
+            progressStatus.textContent = 'Extracting key deliverables & action items...';
         } else {
             setStepState(4, 'completed');
             setStepState(5, 'running');
             percent = 90 + Math.min(Math.round(((elapsed - 48) / 12) * 8), 8); // caps at 98%
-            progressStatus.textContent = 'Indexing transcript for RAG context chat...';
+            progressStatus.textContent = 'Structuring content for Q&A chat...';
         }
-        
-        progressBarFill.style.width = `${percent}%`;
+
+        if (progressCircleFill) {
+            const circumference = 339.292;
+            const offset = circumference - (percent / 100) * circumference;
+            progressCircleFill.style.strokeDashoffset = offset;
+        }
         progressPercent.textContent = `${percent}%`;
     }, 500);
 }
@@ -185,7 +191,7 @@ function startProgressSimulation() {
 function setStepState(stepNum, state) {
     const el = document.getElementById(`step-${stepNum}`);
     if (!el) return;
-    
+
     if (state === 'pending') {
         el.className = 'step-item pending';
         el.querySelector('i').className = 'fa-regular fa-circle';
@@ -201,7 +207,9 @@ function setStepState(stepNum, state) {
 function stopProgressSimulation(success = true) {
     clearInterval(progressInterval);
     if (success) {
-        progressBarFill.style.width = '100%';
+        if (progressCircleFill) {
+            progressCircleFill.style.strokeDashoffset = '0';
+        }
         progressPercent.textContent = '100%';
         progressStatus.textContent = 'Analysis complete!';
         for (let s = 1; s <= 5; s++) {
@@ -218,12 +226,12 @@ function stopProgressSimulation(success = true) {
 function resetUIState() {
     activeSession = null;
     currentDocTitle.textContent = 'Welcome to AskSource-AI';
-    
+
     // Toggle header nav elements: Only show brand logo
     if (brandHeaderLogo) brandHeaderLogo.style.display = 'flex';
     if (headerNavDivider) headerNavDivider.style.display = 'none';
     if (currentDocTitle) currentDocTitle.style.display = 'none';
-    
+
     // Show landing screen, hide ingest and dashboard
     if (landingScreen) landingScreen.style.display = 'flex';
     chatWelcome.style.display = 'none';
@@ -231,7 +239,7 @@ function resetUIState() {
     chatInputContainer.style.display = 'none';
     enableChat(false);
     enableControls(true);
-    
+
     // Clear inputs
     youtubeUrlInput.value = '';
     fileInput.value = '';
@@ -240,32 +248,37 @@ function resetUIState() {
 // Load state into UI after ingestion or reload
 function loadStateIntoUI(state) {
     activeSession = state.source_name;
-    
+
     currentDocTitle.textContent = state.title || "Meeting Assistant";
-    
+
     // Toggle header nav elements: Show brand logo + divider + active document name
     if (brandHeaderLogo) brandHeaderLogo.style.display = 'flex';
     if (headerNavDivider) headerNavDivider.style.display = 'inline';
     if (currentDocTitle) currentDocTitle.style.display = 'inline-block';
-    
+
     // Set content in tabs
     summaryText.innerHTML = renderMarkdown(state.summary);
     actionItemsText.innerHTML = renderMarkdown(state.action_items);
     keyDecisionsText.innerHTML = renderMarkdown(state.key_decisions);
     openQuestionsText.innerHTML = renderMarkdown(state.open_questions);
     transcriptText.textContent = state.transcript;
-    
+
     // Setup message boards
     chatMessages.innerHTML = '';
     appendSystemMessage(`Meeting <strong>${escapeHtml(state.title)}</strong> successfully indexed! You can now explore summary highlights or ask custom questions in the Q&A Chat tab.`);
-    
+
     if (landingScreen) landingScreen.style.display = 'none';
     chatWelcome.style.display = 'none';
     assistantDashboard.style.display = 'flex';
     chatInputContainer.style.display = 'flex';
-    
+
     enableChat(true);
     enableControls(true);
+
+    // Ensure view starts at the top
+    if (chatMessagesWrapper) {
+        chatMessagesWrapper.scrollTop = 0;
+    }
 }
 
 function setupSidebarDeleteHandler() {
@@ -342,22 +355,22 @@ function setupCustomDropdown() {
             opt.addEventListener('click', (e) => {
                 const val = opt.getAttribute('data-value');
                 const text = opt.textContent;
-                
+
                 // Update hidden input value
                 if (hiddenLanguageInput) {
                     hiddenLanguageInput.value = val;
                     hiddenLanguageInput.dispatchEvent(new Event('change'));
                 }
-                
+
                 // Update label
                 if (customSelectLabel) {
                     customSelectLabel.textContent = text;
                 }
-                
+
                 // Update selected class
                 customOptions.forEach(o => o.classList.remove('selected'));
                 opt.classList.add('selected');
-                
+
                 customSelectWrapper.classList.remove('open');
                 e.stopPropagation();
             });
@@ -368,26 +381,26 @@ function setupCustomDropdown() {
 async function triggerYouTubeProcess(url) {
     enableControls(false);
     startProgressSimulation();
-    
+
     const formData = new FormData();
     formData.append('youtube_url', url);
     formData.append('language', languageSelect.value);
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/api/process`, {
             method: 'POST',
             body: formData
         });
-        
+
         if (!response.ok) {
             const err = await response.json();
             throw new Error(err.detail || 'Failed to process YouTube audio');
         }
-        
+
         const data = await response.json();
         stopProgressSimulation(true);
         loadStateIntoUI(data);
-        
+
     } catch (error) {
         console.error('YouTube process failed:', error);
         stopProgressSimulation(false);
@@ -399,26 +412,26 @@ async function triggerYouTubeProcess(url) {
 async function triggerUpload(file) {
     enableControls(false);
     startProgressSimulation();
-    
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('language', languageSelect.value);
-    
+
     try {
         const response = await fetch(`${API_BASE_URL}/api/process`, {
             method: 'POST',
             body: formData
         });
-        
+
         if (!response.ok) {
             const err = await response.json();
             throw new Error(err.detail || 'Failed to process file upload');
         }
-        
+
         const data = await response.json();
         stopProgressSimulation(true);
         loadStateIntoUI(data);
-        
+
     } catch (error) {
         console.error('File process failed:', error);
         stopProgressSimulation(false);
@@ -432,10 +445,10 @@ function setupTabHandlers() {
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const targetTab = btn.getAttribute('data-tab');
-            
+
             tabButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             tabContents.forEach(content => {
                 if (content.id === targetTab) {
                     content.classList.add('active');
@@ -443,8 +456,14 @@ function setupTabHandlers() {
                     content.classList.remove('active');
                 }
             });
-            
-            scrollToBottom();
+
+            if (targetTab === 'chat-tab') {
+                scrollToBottom();
+            } else {
+                if (chatMessagesWrapper) {
+                    chatMessagesWrapper.scrollTop = 0;
+                }
+            }
         });
     });
 }
@@ -453,7 +472,7 @@ function setupTabHandlers() {
 function setupDownloadHandler() {
     btnDownloadTranscript.addEventListener('click', () => {
         if (!transcriptText.textContent) return;
-        
+
         const blob = new Blob([transcriptText.textContent], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -673,18 +692,18 @@ function escapeHtml(text) {
 // Simple custom Markdown rendering for bullet points, lists, and headers
 function renderMarkdown(text) {
     if (!text) return "";
-    
+
     // Escape HTML first to prevent code injection
     let escaped = escapeHtml(text);
-    
+
     // Bold text (**bold**)
     escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
+
     const lines = escaped.split('\n');
     let html = "";
     let inList = false;
     let listType = null;
-    
+
     for (let line of lines) {
         let trimmed = line.trim();
         if (!trimmed) {
@@ -695,7 +714,7 @@ function renderMarkdown(text) {
             }
             continue;
         }
-        
+
         // Headers: # Header 1, ## Header 2, ### Header 3, etc.
         if (trimmed.startsWith('#')) {
             if (inList) {
@@ -720,7 +739,7 @@ function renderMarkdown(text) {
                 listType = 'ul';
             }
             html += `<li>${trimmed.substring(2)}</li>`;
-        } 
+        }
         // Ordered list
         else if (/^\d+\.\s/.test(trimmed)) {
             if (!inList || listType !== 'ol') {
@@ -731,7 +750,7 @@ function renderMarkdown(text) {
             }
             const matchIndex = trimmed.indexOf('.');
             html += `<li>${trimmed.substring(matchIndex + 2)}</li>`;
-        } 
+        }
         // Normal paragraph
         else {
             if (inList) {
@@ -742,11 +761,11 @@ function renderMarkdown(text) {
             html += `<p>${trimmed}</p>`;
         }
     }
-    
+
     if (inList) {
         html += `</${listType}>`;
     }
-    
+
     return html;
 }
 
@@ -845,7 +864,7 @@ function setupHeaderMenuAndDropdown() {
             if (activeSession) {
                 const confirmed = await showCustomConfirm(`Are you sure you want to clear this active session and start a new one?`);
                 if (!confirmed) return;
-                
+
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/clear`, {
                         method: 'POST'
@@ -857,11 +876,11 @@ function setupHeaderMenuAndDropdown() {
                     return;
                 }
             }
-            
+
             // Clear memory
             activeSession = null;
             activeSessionData = null;
-            
+
             resetUIState();
             // Directly show the ingestion screen
             if (landingScreen) landingScreen.style.display = 'none';
@@ -976,7 +995,7 @@ function setupInfoModalClose() {
 let exampleQuestionsInterval = null;
 function startExampleQuestionsCycler() {
     if (exampleQuestionsInterval) clearInterval(exampleQuestionsInterval);
-    
+
     const questionsList = [
         "Summarize this meeting",
         "What decisions were made?",
@@ -985,7 +1004,7 @@ function startExampleQuestionsCycler() {
         "Who spoke the most?"
     ];
     let questionIndex = 0;
-    
+
     exampleQuestionsInterval = setInterval(() => {
         const el = document.getElementById('rotating-question');
         if (el) {
@@ -1001,23 +1020,46 @@ function startExampleQuestionsCycler() {
     }, 2500);
 }
 
-// Capabilities card auto cycler
+// Capabilities tab cycler & click handler
 let capabilitiesInterval = null;
+let activeCapabilityIndex = 0;
+
+function switchCapability(index) {
+    const tabs = document.querySelectorAll('.cap-tab-btn');
+    const panels = document.querySelectorAll('.capability-panel');
+
+    if (tabs.length === 0 || panels.length === 0) return;
+
+    // Deactivate previous active elements
+    tabs.forEach(t => t.classList.remove('active'));
+    panels.forEach(p => p.classList.remove('active'));
+
+    // Activate targeted elements
+    activeCapabilityIndex = index;
+    if (tabs[index]) tabs[index].classList.add('active');
+    if (panels[index]) panels[index].classList.add('active');
+}
+
 function startCapabilitiesCycler() {
     if (capabilitiesInterval) clearInterval(capabilitiesInterval);
-    
-    let activeIndex = 0;
+
+    // Handle tab clicking
+    const tabs = document.querySelectorAll('.cap-tab-btn');
+    tabs.forEach((tab, index) => {
+        // Clone tab to strip duplicate event listeners if initialized multiple times
+        const newTab = tab.cloneNode(true);
+        tab.parentNode.replaceChild(newTab, tab);
+
+        newTab.addEventListener('click', () => {
+            switchCapability(index);
+            // Restart cycler after click to reset timer
+            startCapabilitiesCycler();
+        });
+    });
+
+    // Auto-cycle every 1.5 seconds
     capabilitiesInterval = setInterval(() => {
-        const cards = document.querySelectorAll('.feature-card-premium');
-        if (cards && cards.length > 0) {
-            // Remove active class from current card
-            cards[activeIndex].classList.remove('active');
-            
-            // Advance index
-            activeIndex = (activeIndex + 1) % cards.length;
-            
-            // Add active class to next card
-            cards[activeIndex].classList.add('active');
-        }
-    }, 1500); // 1.5 seconds cycle interval!
+        const nextIndex = (activeCapabilityIndex + 1) % 4;
+        switchCapability(nextIndex);
+    }, 1500);
 }
