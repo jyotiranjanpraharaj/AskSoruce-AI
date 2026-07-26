@@ -58,6 +58,11 @@ def download_youtube_audio(url: str) -> str:
             'nocheckcertificate': True,
             'quiet': True,
             'no_warnings': True,
+            'extractor_args': {
+                'youtube': {
+                    'client': ['ios', 'android', 'mweb']
+                }
+            }
         }
         if cookie_path and os.path.exists(cookie_path):
             ydl_opts['cookiefile'] = cookie_path
