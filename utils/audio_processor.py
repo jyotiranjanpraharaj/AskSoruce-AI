@@ -7,6 +7,24 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 def download_youtube_audio(url: str) -> str:
     """Download audio from YouTube using yt-dlp with pytubefix fallback."""
     print(f"Downloading audio from YouTube URL...")
+    
+    # Handle YOUTUBE_COOKIES environment variable or local cookies.txt file
+    cookie_path = os.path.join(DOWNLOAD_DIR, "cookies.txt")
+    env_cookies = os.getenv("YOUTUBE_COOKIES")
+    
+    if env_cookies:
+        try:
+            with open(cookie_path, "w", encoding="utf-8") as f:
+                f.write(env_cookies)
+            print("Successfully loaded YouTube cookies from environment variable.")
+        except Exception as ce:
+            print(f"Failed to write environment cookies: {ce}")
+    elif os.path.exists("cookies.txt"):
+        # If user committed/uploaded cookies.txt to root
+        cookie_path = "cookies.txt"
+    else:
+        cookie_path = None
+
     try:
         import yt_dlp
         out_template = os.path.join(DOWNLOAD_DIR, "%(id)s_%(title)s.%(ext)s")
@@ -17,6 +35,10 @@ def download_youtube_audio(url: str) -> str:
             'quiet': True,
             'no_warnings': True,
         }
+        if cookie_path and os.path.exists(cookie_path):
+            ydl_opts['cookiefile'] = cookie_path
+            print("Passing cookies to yt-dlp configuration.")
+            
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
@@ -30,7 +52,11 @@ def download_youtube_audio(url: str) -> str:
             downloaded_file = audio_stream.download(output_path=DOWNLOAD_DIR)
             return downloaded_file
         except Exception as fallback_e:
-            raise ValueError(f"Failed to download audio from YouTube: {fallback_e}")
+            raise ValueError(
+                "YouTube detected bot activity. To fix this, export a 'cookies.txt' file from your browser "
+                "and set it as the YOUTUBE_COOKIES environment variable on Render, or place 'cookies.txt' "
+                "in your project root."
+            )
 
 def convert_to_mp3(input_path: str) -> str:
     """Convert any audio/video file to 16kHz mono MP3 format using pydub for compact size."""
