@@ -27,9 +27,8 @@ It downloads audio from YouTube URLs or processes local audio files, transcribes
 📂 AskSource-AI/
 ├── 📁 core/                 # Core AI modules (rag_engine, extractor, summarizer, transcriber, vector_store)
 ├── 📁 utils/                # Audio conversion and download helpers
-├── main.py                 # FastAPI server (Document RAG API)
-├── run_pipeline.py         # End-to-end CLI runner for YouTube/Audio pipeline
-├── test.py                 # Unit tests (Mocked transcriber check)
+├── 📁 frontend/             # Static web UI (HTML, CSS, JS)
+├── server.py               # FastAPI backend server
 ├── requirements.txt        # Project dependencies
 └── .env                    # Environment variables (API keys)
 ```
@@ -77,16 +76,10 @@ It downloads audio from YouTube URLs or processes local audio files, transcribes
 
 ## 🖥️ Usage
 
-### 1. Run Audio / YouTube Pipeline
-Download a YouTube video/Short, transcribe it, extract deliverables, index it, and run test queries:
+### 1. Run the Web Server
+Start the FastAPI server which also serves the frontend UI:
 ```bash
-python run_pipeline.py "<YOUTUBE_URL>"
+uvicorn server:app --host 0.0.0.0 --port 8000 --reload
 ```
-*Note: Temporary audio files and chunks are automatically cleaned up after the pipeline runs.*
-
-### 2. Run Interactive CLI Chat
-Process a source (YouTube URL or local audio file path) and start an interactive terminal-based chat session with the transcript:
-```bash
-python main.py
-```
-* Interactive docs will be available at `http://127.0.0.1:8000/docs`.
+* Then open your browser and navigate to `http://localhost:8000` to use the web application.
+* Interactive API docs are available at `http://localhost:8000/docs`.
