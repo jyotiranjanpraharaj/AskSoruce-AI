@@ -4,6 +4,29 @@ from pydub import AudioSegment
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+def clean_cookie_content(content: str) -> str:
+    """Automatically clean up and convert space-separated cookies back to Tab-separated Netscape format."""
+    cleaned_lines = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            cleaned_lines.append(line)
+            continue
+        # Split by any whitespace (tabs or multiple spaces)
+        parts = stripped.split()
+        if len(parts) >= 7:
+            domain = parts[0]
+            flag = parts[1]
+            path = parts[2]
+            secure = parts[3]
+            expiration = parts[4]
+            name = parts[5]
+            value = " ".join(parts[6:])
+            cleaned_lines.append(f"{domain}\t{flag}\t{path}\t{secure}\t{expiration}\t{name}\t{value}")
+        else:
+            cleaned_lines.append(line)
+    return "\n".join(cleaned_lines)
+
 def download_youtube_audio(url: str) -> str:
     """Download audio from YouTube using yt-dlp with pytubefix fallback."""
     print(f"Downloading audio from YouTube URL...")
@@ -14,9 +37,10 @@ def download_youtube_audio(url: str) -> str:
     
     if env_cookies:
         try:
+            cleaned_cookies = clean_cookie_content(env_cookies)
             with open(cookie_path, "w", encoding="utf-8") as f:
-                f.write(env_cookies)
-            print("Successfully loaded YouTube cookies from environment variable.")
+                f.write(cleaned_cookies)
+            print("Successfully loaded and formatted YouTube cookies from environment variable.")
         except Exception as ce:
             print(f"Failed to write environment cookies: {ce}")
     elif os.path.exists("cookies.txt"):
