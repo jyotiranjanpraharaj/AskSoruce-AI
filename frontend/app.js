@@ -48,7 +48,7 @@ let isProcessing = false;
 let progressInterval = null;
 const API_BASE_URL = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
     ? 'http://localhost:8000'
-    : 'https://rag-with-pdf-backend.onrender.com'; // Replace with your Render URL
+    : 'https://asksoruce-ai.onrender.com';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
