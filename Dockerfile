@@ -1,8 +1,8 @@
 FROM python:3.10-slim
 
-# Install ffmpeg and clean up
+# Install ffmpeg, nodejs and clean up
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg nodejs && \
     rm -rf /var/lib/apt/lists/*
 
 # Set working directory
