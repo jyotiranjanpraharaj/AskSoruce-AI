@@ -25,8 +25,7 @@ def download_youtube_audio(url: str) -> str:
         print(f"yt-dlp download failed: {e}. Trying pytubefix fallback...")
         try:
             from pytubefix import YouTube
-            # use_po_token bypasses YouTube's bot detection on cloud servers
-            yt = YouTube(url, use_po_token=True)
+            yt = YouTube(url)
             audio_stream = yt.streams.filter(only_audio=True).first()
             downloaded_file = audio_stream.download(output_path=DOWNLOAD_DIR)
             return downloaded_file
