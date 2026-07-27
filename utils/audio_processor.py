@@ -2,7 +2,6 @@ import os
 import socket
 import urllib3
 urllib3.util.connection.allowed_gai_family = lambda: socket.AF_INET
-from pydub import AudioSegment
 
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)

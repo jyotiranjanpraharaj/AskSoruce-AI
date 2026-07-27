@@ -8,7 +8,6 @@ python-multipart>=0.0.6           # Form data parsing for file uploads
 
 # ── Audio / Video acquisition ─────────────────────────────────────────────────
 yt-dlp>=2025.2.18                  # Download audio from YouTube URLs
-pydub>=0.25.1                     # Audio file manipulation / format conversion
 ffmpeg-python>=0.2.0              # FFmpeg bindings (FFmpeg binary must be installed separately)
 
 # ── Speech-to-Text (Groq Whisper Cloud API) ───────────────────────────────────
