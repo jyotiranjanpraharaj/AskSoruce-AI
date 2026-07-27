@@ -4,6 +4,78 @@ from pydub import AudioSegment
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+def download_via_cobalt(youtube_url: str) -> str:
+    """Download audio from YouTube using public Cobalt instances as a fallback."""
+    print("Attempting to download via public Cobalt instances...")
+    import requests
+    import re
+    
+    try:
+        # Fetch active cobalt instances
+        res = requests.get("https://instances.cobalt.tools/api/v1/instances", timeout=5)
+        if res.status_code != 200:
+            raise ValueError("Failed to fetch Cobalt instances list")
+        instances = res.json()
+    except Exception as ie:
+        print(f"Failed to fetch Cobalt instances: {ie}")
+        # Standard fallback list of known active cobalt instances
+        instances = [
+            {"url": "https://cobalt.tony.al"},
+            {"url": "https://co.wuk.sh"},
+            {"url": "https://cobalt.inst.host"},
+            {"url": "https://cobalt.cr.us.kg"},
+        ]
+
+    for inst in instances:
+        base_url = inst.get("url")
+        if not base_url:
+            continue
+            
+        # Try both the newer API endpoint (POST /) and older (POST /api/json)
+        for api_path in ["", "/api/json"]:
+            api_url = base_url.rstrip("/") + api_path
+            print(f"Trying Cobalt instance: {api_url}")
+            try:
+                payload = {
+                    "url": youtube_url,
+                    "downloadMode": "audio",
+                    "audioFormat": "mp3",
+                    "filenamePattern": "basic"
+                }
+                headers = {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                }
+                
+                post_res = requests.post(api_url, json=payload, headers=headers, timeout=10)
+                if post_res.status_code != 200:
+                    continue
+                    
+                data = post_res.json()
+                download_url = data.get("url")
+                if not download_url:
+                    continue
+                    
+                print(f"Success! Downloading audio file from Cobalt mirror: {download_url}")
+                
+                # Fetch filename or generate one
+                filename_clean = re.sub(r'[^a-zA-Z0-9]', '_', youtube_url.split("v=")[-1]) + ".mp3"
+                file_path = os.path.join(DOWNLOAD_DIR, filename_clean)
+                
+                # Download the actual file
+                file_res = requests.get(download_url, stream=True, timeout=30)
+                if file_res.status_code == 200:
+                    with open(file_path, "wb") as f:
+                        for chunk in file_res.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    return file_path
+            except Exception as inst_e:
+                print(f"Instance {api_url} failed: {inst_e}")
+                continue
+                
+    raise ValueError("All Cobalt download instances failed or timed out.")
+
 def clean_cookie_content(content: str) -> str:
     """Automatically clean up and convert space-separated cookies back to Tab-separated Netscape format."""
     cleaned_lines = []
@@ -81,11 +153,17 @@ def download_youtube_audio(url: str) -> str:
             downloaded_file = audio_stream.download(output_path=DOWNLOAD_DIR)
             return downloaded_file
         except Exception as fallback_e:
-            raise ValueError(
-                "YouTube detected bot activity. To fix this, export a 'cookies.txt' file from your browser "
-                "and set it as the YOUTUBE_COOKIES environment variable on Render, or place 'cookies.txt' "
-                "in your project root."
-            )
+            print(f"pytubefix download failed: {fallback_e}. Trying Cobalt API fallback...")
+            try:
+                downloaded_file = download_via_cobalt(url)
+                return downloaded_file
+            except Exception as cobalt_e:
+                raise ValueError(
+                    f"YouTube download failed completely. Reason: {cobalt_e}. "
+                    "To fix this, export a fresh 'cookies.txt' file from your browser "
+                    "and set it as the YOUTUBE_COOKIES environment variable on Render, or place 'cookies.txt' "
+                    "in your project root."
+                )
 
 def convert_to_mp3(input_path: str) -> str:
     """Convert any audio/video file to 16kHz mono MP3 format using pydub for compact size."""
