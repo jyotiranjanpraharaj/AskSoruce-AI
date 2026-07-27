@@ -7,6 +7,62 @@ from pydub import AudioSegment
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+def download_via_rapidapi(video_id: str) -> str:
+    """Download audio from YouTube using RapidAPI's YouTube MP3 Audio Video Downloader."""
+    import requests
+    
+    api_key = os.getenv("RAPIDAPI_KEY")
+    if not api_key:
+        raise ValueError("RAPIDAPI_KEY environment variable is not set.")
+        
+    url = f"https://youtube-mp3-audio-video-downloader.p.rapidapi.com/get_raw_audio_download_link/{video_id}"
+    headers = {
+        "x-rapidapi-key": api_key,
+        "x-rapidapi-host": "youtube-mp3-audio-video-downloader.p.rapidapi.com"
+    }
+    querystring = {"quality": "140"}
+    
+    print(f"Calling RapidAPI to get audio link for video {video_id}...")
+    response = requests.get(url, headers=headers, params=querystring, timeout=10)
+    
+    if response.status_code != 200:
+        raise ValueError(f"RapidAPI request failed with status code {response.status_code}: {response.text}")
+        
+    data = response.json()
+    # Check multiple common keys in the JSON payload defensively
+    download_url = data.get("url") or data.get("download_link") or data.get("downloadUrl")
+    if not download_url and isinstance(data.get("result"), dict):
+        download_url = data.get("result").get("url") or data.get("result").get("download_link")
+        
+    if not download_url:
+        # Check nested structures
+        if isinstance(data.get("download"), dict):
+            download_url = data.get("download").get("url") or data.get("download").get("download_link")
+        
+    if not download_url:
+        # Fallback to checking the whole response for any URL string
+        for k, v in data.items():
+            if isinstance(v, str) and v.startswith("http"):
+                download_url = v
+                break
+                
+    if not download_url:
+        raise ValueError(f"Failed to find download URL in RapidAPI response: {data}")
+        
+    print(f"RapidAPI Success! Downloading audio file from: {download_url}")
+    
+    file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}.m4a")
+    
+    # Download the actual file from the direct link
+    res = requests.get(download_url, stream=True, timeout=30)
+    if res.status_code == 200:
+        with open(file_path, "wb") as f:
+            for chunk in res.iter_content(chunk_size=8192):
+                f.write(chunk)
+        return file_path
+        
+    raise ValueError(f"Failed to download audio file from RapidAPI link (Status: {res.status_code})")
+
 def download_via_cobalt(youtube_url: str) -> str:
     """Download audio from YouTube using public Cobalt instances as a fallback."""
     print("Attempting to download via public Cobalt instances...")
@@ -113,9 +169,31 @@ def clean_cookie_content(content: str) -> str:
     return "\n".join(cleaned_lines)
 
 def download_youtube_audio(url: str) -> str:
-    """Download audio from YouTube using yt-dlp with pytubefix fallback."""
+    """Download audio from YouTube using RapidAPI, yt-dlp, or Cobalt fallbacks."""
     print(f"Downloading audio from YouTube URL...")
+    import re
     
+    # Extract video ID from URL
+    video_id = None
+    patterns = [
+        r'(?:v=|\/)([a-zA-Z0-9_-]{11})',
+        r'youtu\.be\/([a-zA-Z0-9_-]{11})'
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            video_id = match.group(1)
+            break
+            
+    # Try RapidAPI first if key is configured
+    if video_id and os.getenv("RAPIDAPI_KEY"):
+        try:
+            print("RapidAPI Key detected. Attempting to download via RapidAPI...")
+            file_path = download_via_rapidapi(video_id)
+            return file_path
+        except Exception as ra_e:
+            print(f"RapidAPI download failed: {ra_e}. Falling back to local/Cobalt engines...")
+            
     # Handle YOUTUBE_COOKIES environment variable or local cookies.txt file
     cookie_path = os.path.join(DOWNLOAD_DIR, "cookies.txt")
     env_cookies = os.getenv("YOUTUBE_COOKIES")
