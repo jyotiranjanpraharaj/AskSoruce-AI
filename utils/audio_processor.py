@@ -15,15 +15,15 @@ def download_via_rapidapi(video_id: str) -> str:
     if not api_key:
         raise ValueError("RAPIDAPI_KEY environment variable is not set.")
         
-    url = f"https://youtube-mp3-audio-video-downloader.p.rapidapi.com/get_raw_audio_download_link/{video_id}"
+    url = f"https://youtube-mp3-audio-video-downloader.p.rapidapi.com/get_mp3_download_link/{video_id}"
     headers = {
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": "youtube-mp3-audio-video-downloader.p.rapidapi.com"
     }
-    querystring = {"quality": "140"}
+    querystring = {"quality": "low", "wait_until_the_file_is_ready": "true"}
     
     print(f"Calling RapidAPI to get audio link for video {video_id}...")
-    response = requests.get(url, headers=headers, params=querystring, timeout=10)
+    response = requests.get(url, headers=headers, params=querystring, timeout=30)
     
     if response.status_code != 200:
         raise ValueError(f"RapidAPI request failed with status code {response.status_code}: {response.text}")
