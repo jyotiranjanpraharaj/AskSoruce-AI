@@ -8,8 +8,9 @@ DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 def download_via_rapidapi(video_id: str) -> str:
-    """Download audio from YouTube using RapidAPI's YouTube MP3 Audio Video Downloader."""
+    """Download audio from YouTube using RapidAPI's YouTube MP3 Audio Video Downloader with polling."""
     import requests
+    import time
     
     api_key = os.getenv("RAPIDAPI_KEY")
     if not api_key:
@@ -20,48 +21,56 @@ def download_via_rapidapi(video_id: str) -> str:
         "x-rapidapi-key": api_key,
         "x-rapidapi-host": "youtube-mp3-audio-video-downloader.p.rapidapi.com"
     }
-    querystring = {"quality": "low", "wait_until_the_file_is_ready": "true"}
+    # Set wait_until_the_file_is_ready to false so we don't timeout, and we poll instead!
+    querystring = {"quality": "low", "wait_until_the_file_is_ready": "false"}
     
-    print(f"Calling RapidAPI to get audio link for video {video_id}...")
-    response = requests.get(url, headers=headers, params=querystring, timeout=30)
-    
-    if response.status_code != 200:
-        raise ValueError(f"RapidAPI request failed with status code {response.status_code}: {response.text}")
+    max_retries = 20  # Try for up to 60 seconds
+    for attempt in range(max_retries):
+        print(f"Calling RapidAPI to get audio link for video {video_id} (Attempt {attempt + 1}/{max_retries})...")
+        response = requests.get(url, headers=headers, params=querystring, timeout=10)
         
-    data = response.json()
-    # Check multiple common keys in the JSON payload defensively
-    download_url = data.get("url") or data.get("download_link") or data.get("downloadUrl")
-    if not download_url and isinstance(data.get("result"), dict):
-        download_url = data.get("result").get("url") or data.get("result").get("download_link")
+        if response.status_code != 200:
+            raise ValueError(f"RapidAPI request failed with status code {response.status_code}: {response.text}")
+            
+        data = response.json()
         
-    if not download_url:
-        # Check nested structures
-        if isinstance(data.get("download"), dict):
-            download_url = data.get("download").get("url") or data.get("download").get("download_link")
+        # Check multiple common keys in the JSON payload defensively
+        download_url = data.get("url") or data.get("download_link") or data.get("downloadUrl")
+        if not download_url and isinstance(data.get("result"), dict):
+            download_url = data.get("result").get("url") or data.get("result").get("download_link")
+            
+        if not download_url:
+            # Check nested structures
+            if isinstance(data.get("download"), dict):
+                download_url = data.get("download").get("url") or data.get("download").get("download_link")
+            
+        if not download_url:
+            # Fallback to checking the whole response for any URL string
+            for k, v in data.items():
+                if isinstance(v, str) and v.startswith("http"):
+                    download_url = v
+                    break
+                    
+        # If we got the URL, proceed to download the audio file
+        if download_url:
+            print(f"RapidAPI Success! Downloading audio file from: {download_url}")
+            file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}.m4a")
+            
+            # Download the actual file from the direct link
+            res = requests.get(download_url, stream=True, timeout=30)
+            if res.status_code == 200:
+                with open(file_path, "wb") as f:
+                    for chunk in res.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                return file_path
+            raise ValueError(f"Failed to download audio file from RapidAPI link (Status: {res.status_code})")
+            
+        # If we didn't get the URL, the file is still converting. Sleep and retry.
+        status_msg = data.get("status") or data.get("message") or "processing"
+        print(f"Audio is still converting on API servers (Status: {status_msg}). Waiting 3 seconds...")
+        time.sleep(3)
         
-    if not download_url:
-        # Fallback to checking the whole response for any URL string
-        for k, v in data.items():
-            if isinstance(v, str) and v.startswith("http"):
-                download_url = v
-                break
-                
-    if not download_url:
-        raise ValueError(f"Failed to find download URL in RapidAPI response: {data}")
-        
-    print(f"RapidAPI Success! Downloading audio file from: {download_url}")
-    
-    file_path = os.path.join(DOWNLOAD_DIR, f"{video_id}.m4a")
-    
-    # Download the actual file from the direct link
-    res = requests.get(download_url, stream=True, timeout=30)
-    if res.status_code == 200:
-        with open(file_path, "wb") as f:
-            for chunk in res.iter_content(chunk_size=8192):
-                f.write(chunk)
-        return file_path
-        
-    raise ValueError(f"Failed to download audio file from RapidAPI link (Status: {res.status_code})")
+    raise ValueError("RapidAPI audio conversion timed out after 60 seconds.")
 
 def download_via_cobalt(youtube_url: str) -> str:
     """Download audio from YouTube using public Cobalt instances as a fallback."""
