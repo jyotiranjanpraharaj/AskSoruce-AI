@@ -27,7 +27,7 @@ def download_via_rapidapi(video_id: str) -> str:
     max_retries = 20  # Try for up to 60 seconds
     for attempt in range(max_retries):
         print(f"Calling RapidAPI to get audio link for video {video_id} (Attempt {attempt + 1}/{max_retries})...")
-        response = requests.get(url, headers=headers, params=querystring, timeout=10)
+        response = requests.get(url, headers=headers, params=querystring, timeout=25)
         
         if response.status_code != 200:
             raise ValueError(f"RapidAPI request failed with status code {response.status_code}: {response.text}")
