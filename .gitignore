@@ -3,7 +3,10 @@ __pycache__/
 chroma_db/
 env/
 venv/
+.venv/
 *.pyc
 .ipynb_checkpoints/
 downloades/
 session_state.json
+.vscode/
+.idea/
