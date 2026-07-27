@@ -5,7 +5,7 @@ It downloads audio from YouTube URLs or processes local audio files, transcribes
 
 ## 🏗️ System Architecture
 
-* **Audio Ingestion**: YouTube URL / Local Audio ➔ `pytubefix` Download ➔ `pydub` (converted to 16kHz mono WAV) ➔ Chunking.
+* **Audio Ingestion**: YouTube URL / Local Audio ➔ `yt-dlp` / RapidAPI Download ➔ FFmpeg Conversion (16kHz mono MP3) ➔ Chunking.
 * **Transcription & Extraction**: Audio Chunks ➔ Groq Whisper Cloud API (Transcriptions) ➔ Mistral AI (Summary, Action Items, Key Decisions, and Questions Extraction).
 * **RAG Pipeline**: Text Chunks ➔ HuggingFace Embeddings (`all-MiniLM-L6-v2`) ➔ Pinecone Vector Store ➔ Mistral AI Context-Aware QA.
 
@@ -17,7 +17,7 @@ It downloads audio from YouTube URLs or processes local audio files, transcribes
 * **Speech-to-Text**: Groq Cloud API (Whisper-large-v3)
 * **Vector Store**: Pinecone
 * **Text Embeddings**: HuggingFace Sentence Transformers (`all-MiniLM-L6-v2`)
-* **Audio Engineering**: `pytubefix` & `pydub` (FFmpeg)
+* **Audio Engineering**: `yt-dlp` & FFmpeg
 * **Backend Framework**: FastAPI & Uvicorn
 
 ---
