@@ -840,15 +840,15 @@ body {
 /* Full Screen Loading Overlay */
 .full-screen-loader {
     position: fixed;
-    top: 0;
+    top: 60px; /* Starts below header */
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 60px);
     background: var(--bg-app);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1001; /* Covers header (100) and other overlays */
+    z-index: 99; /* Below header (100) */
     animation: fadeIn 0.3s ease-out;
 }
 
