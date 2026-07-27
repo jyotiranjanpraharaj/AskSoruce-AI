@@ -7,7 +7,7 @@ uvicorn>=0.23.2                   # ASGI server
 python-multipart>=0.0.6           # Form data parsing for file uploads
 
 # ── Audio / Video acquisition ─────────────────────────────────────────────────
-yt-dlp>=2024.4.9                  # Download audio from YouTube URLs
+yt-dlp>=2025.2.18                  # Download audio from YouTube URLs
 pytubefix>=6.4.1                  # YouTube download fallback
 pydub>=0.25.1                     # Audio file manipulation / format conversion
 ffmpeg-python>=0.2.0              # FFmpeg bindings (FFmpeg binary must be installed separately)
