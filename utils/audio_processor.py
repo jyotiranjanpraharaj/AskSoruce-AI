@@ -1,4 +1,7 @@
 import os
+import socket
+import urllib3
+urllib3.util.connection.allowed_gai_family = lambda: socket.AF_INET
 from pydub import AudioSegment
 
 DOWNLOAD_DIR = 'downloades'
@@ -10,24 +13,34 @@ def download_via_cobalt(youtube_url: str) -> str:
     import requests
     import re
     
+    instances = []
     try:
-        # Fetch active cobalt instances
-        res = requests.get("https://instances.cobalt.tools/api/v1/instances", timeout=5)
-        if res.status_code != 200:
-            raise ValueError("Failed to fetch Cobalt instances list")
-        instances = res.json()
+        res = requests.get("https://cobalt.directory", timeout=5)
+        if res.status_code == 200:
+            urls = re.findall(r'https://[a-zA-Z0-9.-]*cobalt[a-zA-Z0-9.-]*\.[a-zA-Z]{2,}', res.text)
+            for url in set(urls):
+                url = url.strip()
+                if "directory" not in url and "tools" not in url:
+                    instances.append(url)
+            print(f"Dynamically discovered {len(instances)} active Cobalt mirrors from tracker.")
     except Exception as ie:
-        print(f"Failed to fetch Cobalt instances: {ie}")
-        # Standard fallback list of known active cobalt instances
+        print(f"Failed to scrape cobalt.directory: {ie}")
+        
+    # If scraping fails, use the verified, current active mirrors list
+    if not instances:
         instances = [
-            {"url": "https://cobalt.tony.al"},
-            {"url": "https://co.wuk.sh"},
-            {"url": "https://cobalt.inst.host"},
-            {"url": "https://cobalt.cr.us.kg"},
+            "https://cobalt.tame.gg",
+            "https://cobalt.eversiege.network",
+            "https://cobalt.clxxped.lol",
+            "https://cobalt.kittycat.boo",
+            "https://cobalt.liubquanti.click",
+            "https://cobalt.squair.xyz",
+            "https://cobalt.meowing.de",
+            "https://cobalt.xenon.zone",
+            "https://cobalt.cjs.nz"
         ]
 
-    for inst in instances:
-        base_url = inst.get("url")
+    for base_url in instances:
         if not base_url:
             continue
             

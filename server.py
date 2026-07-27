@@ -7,6 +7,12 @@ import ssl
 # Bypass SSL verification globally for urllib and HuggingFace API calls
 ssl._create_default_https_context = ssl._create_unverified_context
 
+# Force IPv4 globally for urllib3 to prevent DNS timeouts on dual-stack environments like Render
+import socket
+import urllib3
+urllib3.util.connection.allowed_gai_family = lambda: socket.AF_INET
+
+
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
